@@ -5,13 +5,13 @@
 - [latex](https://github.com/neo-mashiro/DOC/blob/master/latex.pdf) - LaTeX template notebook
 
 ## R-Markdown->HTML
-- [C01_brfss_eda](https://github.com/neo-mashiro/DOC/blob/master/C01_brfss_eda.html) - Exploring the BRFSS data
-- [C01_gss_inference](https://github.com/neo-mashiro/DOC/blob/master/C01_gss_inference.html) - Statistical inference with the GSS data
-- [C01_multiple_linear_regression](https://github.com/neo-mashiro/DOC/blob/master/C01_multiple_linear_regression.html) - Modeling and prediction for movies
+- [C01_brfss_eda](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C01_brfss_eda.html) - Exploring the BRFSS data
+- [C01_gss_inference](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C01_gss_inference.html) - Statistical inference with the GSS data
+- [C01_multiple_linear_regression](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C01_multiple_linear_regression.html) - Modeling and prediction for movies
 
 ## HTML, CSS & JavaScript
-- [W01_index](https://github.com/neo-mashiro/DOC/blob/master/W01_index.html) - Some useful elements mixed on a single webpage
-- [W02_Life_on_A4](https://github.com/neo-mashiro/DOC/blob/master/W02_Life_on_A4.html) - Life on a piece of A4 paper (75 yrs * 12 = 900 months)
+- [W01_index](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/W01_index.html) - Some useful elements mixed on a single webpage
+- [W02_Life_on_A4](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/W02_Life_on_A4.html) - Life on a piece of A4 paper (75 yrs * 12 = 900 months)
 
 ## Markdown & reST
 - [M01_markdown](https://github.com/neo-mashiro/DOC/blob/master/M01_markdown.md) - Markdown notebook
@@ -22,7 +22,7 @@
 - [S01_commands](https://github.com/neo-mashiro/DOC/blob/master/S01_commands.sh) - Unix shell notebook
 
 ## Jupyter Notebook
-- [C02_algorithm1](https://github.com/neo-mashiro/DOC/blob/master/C02_algorithm1.ipynb) - Algorithms interactive practice notebook 1
-- [C02_algorithm2](https://github.com/neo-mashiro/DOC/blob/master/C02_algorithm2.ipynb) - Algorithms interactive practice notebook 2
+- [C02_algorithm1](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C02_algorithm1.ipynb) - Algorithms interactive practice notebook 1
+- [C02_algorithm2](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C02_algorithm2.ipynb) - Algorithms interactive practice notebook 2
 - [NetworkX workshop](https://github.com/neo-mashiro/DOC/blob/master/NetworkX%20workshop/)
 - [NetworkX SNA workshop](https://github.com/neo-mashiro/DOC/blob/master/NetworkX%20SNA%20workshop/)
