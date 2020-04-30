@@ -29,5 +29,5 @@
 
 ## SQL & NoSQL
 - [MongoDB notebooks](https://github.com/neo-mashiro/DOC/blob/master/MongoDB%20notebooks) - My MongoDB notebooks, quiz & labs
-- [S02_IBM DB2](https://github.com/neo-mashiro/DOC/blob/master/S02_IBM DB2.ipynb) - SQL database in the cloud
+- [S02_IBM_DB2](https://github.com/neo-mashiro/DOC/blob/master/S02_IBM%20DB2.ipynb) - SQL database in the cloud
 - [S02_MySQL](https://github.com/neo-mashiro/DOC/blob/master/S02_MySQL.sql) - don't forget the password...
