@@ -26,3 +26,8 @@
 - [C02_algorithm2](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C02_algorithm2.ipynb) - Algorithms interactive practice notebook 2
 - [NetworkX workshop](https://github.com/neo-mashiro/DOC/blob/master/NetworkX%20workshop/)
 - [NetworkX SNA workshop](https://github.com/neo-mashiro/DOC/blob/master/NetworkX%20SNA%20workshop/)
+
+## SQL & NoSQL
+- [MongoDB notebooks](https://github.com/neo-mashiro/DOC/blob/master/MongoDB%20notebooks) - My MongoDB notebooks, quiz & labs
+- [S02_IBM DB2](https://github.com/neo-mashiro/DOC/blob/master/S02_IBM DB2.ipynb) - SQL database in the cloud
+- [S02_MySQL](https://github.com/neo-mashiro/DOC/blob/master/S02_MySQL.sql) - don't forget the password...
