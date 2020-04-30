@@ -1,0 +1,348 @@
+% ------------------------------------------------------------------------------
+% adapted from: https://github.com/svmiller/svm-r-markdown-templates
+% ------------------------------------------------------------------------------
+\documentclass[11pt]{article}
+\usepackage{mathpazo}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.5in, top=0.7in, bottom=0.7in]{geometry}
+
+% underline whole line, by neo-mashiro on 2020/04/28
+\usepackage[normalem]{ulem}
+\renewcommand{\ULdepth}{8pt}  % redefine the line height
+
+% stuff added by neo-mashiro on 2019/10/02
+\usepackage{xcolor}
+\definecolor{Navy}{rgb}{0,0,0.5}
+\definecolor{Light}{rgb}{0.7,0.7,0.7}
+\usepackage{inconsolata}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{longtable,booktabs}
+\usepackage{multirow}    % enable a table cell to span multiple rows or multiple columns
+\usepackage{siunitx}     % for numbers in a table column to be aligned at the decimal point, formatting unit and style...
+\sisetup{                % specify how many decimal places should displayed
+  round-mode = places,   % round numbers
+  round-precision = 2,   % to 2 decimal places
+}
+
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\linespread{1.05}
+
+% Now begins the stuff that I added.
+% ----------------------------------
+
+% Custom section fonts
+\usepackage{sectsty}
+\sectionfont{\rmfamily\mdseries\large\bf}
+\subsectionfont{\rmfamily\mdseries\normalsize\itshape}
+
+
+% Make lists without bullets
+\renewenvironment{itemize}{
+  \begin{list}{}{
+    \setlength{\leftmargin}{1em}  % changed from 1.5em to 1em by neo-mashiro on 2019/10/02
+  }
+}{
+  \end{list}
+}
+
+
+% Make parskips rather than indent with lists.
+\usepackage{parskip}
+\usepackage{titlesec}
+\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{4pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{4pt plus 2pt minus 2pt}
+
+% Use fontawesome. Note: you'll need TeXLive 2015. Update.
+\usepackage{fontawesome}
+
+% Fancyhdr, as I tend to do with these personal documents.
+\usepackage{fancyhdr,lastpage}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\renewcommand{\footrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{
+\cfoot{\scriptsize  Wentao Lu - CV }}
+\rfoot{\scriptsize \thepage/{\hypersetup{linkcolor=black}\pageref{LastPage}}}
+
+% Always load hyperref last.
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+
+\hypersetup{unicode=true,
+            pdftitle={Wentao Lu:  CV (Curriculum Vitae)},
+            pdfauthor={Wentao Lu},
+            pdfkeywords={R Markdown, academic CV, template},
+            colorlinks=true,
+            linkcolor=white,
+            citecolor=Blue,
+            urlcolor=blue,
+            breaklinks=true, bookmarks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\begin{document}
+
+
+\centerline{\huge \bf Wentao Lu}
+
+\vspace{2 mm}
+
+\hrule
+
+\vspace{2 mm}
+
+% url font and content modified by neo-mashiro on 2019/10/02
+% {\tt \href{mailto:wlu19@ubishops.ca}{\nolinkurl{wlu19@ubishops.ca}}} -> {\href{mailto:wlu19@ubishops.ca}{\nolinkurl{wlu19@ubishops.ca}}}
+% {\tt neo-mashiro} -> {Github}
+% \href{http://wentao-lu-90125157} -> \href{https://www.linkedin.com/in/wentao-lu-90125157}{Linkedin}
+
+\moveleft.5\hoffset\centerline{515 Rue Kennedy N, Sherbrooke, Quebec J1E 3T8, Canada}
+\moveleft.5\hoffset\centerline{
+\faEnvelopeO \hspace{1 mm} \href{mailto:}{\href{mailto:wlu19@ubishops.ca}{\nolinkurl{wlu19@ubishops.ca}}} \hspace{1 mm} \faPhone \hspace{1 mm}  819-432-5642  \hspace{1 mm}  \faGithub \hspace{1 mm} \href{http://github.com/neo-mashiro}{Github} \hspace{1 mm}  \faGlobe \hspace{1 mm} \href{https://www.linkedin.com/in/wentao-lu-90125157}{Linkedin}}
+
+\vspace{2mm}
+
+\hrule
+
+
+% this is the body of the .rmd file, which comes first in the PDF output
+
+% Now begins the rest of the CV body in this .tex file, which comes afterwards, by neo-mashiro on 2019/10/02
+% ------------------------------------------------------------------------------
+
+\textbf{\textsc{Bishop's University}} \hfill \textcolor{Navy}{Sherbrooke, Quebec, Canada, Sep 2021}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] M.Sc, Computer Science, \textsc{Gpa} 3.90/4
+\end{enumerate}
+
+\textbf{\textsc{Texas {\small A\textit{\&}M} University}} \hfill \textcolor{Navy}{College Station, Texas, USA, May 2014}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] M.Sc, Financial Econometrics, \textsc{Gpa} 3.92/4
+\end{enumerate}
+
+\textbf{\textsc{Shanghai University of Finance and Economics}} \hfill \textcolor{Navy}{Shanghai, China, Jun 2012}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] B.Ec, Mathematical Economics, \textsc{Gpa} 3.26/4
+  \item[] B.BA, Business Administration (Dual Degree)
+\end{enumerate}
+
+% \hspace{8mm}\fcolorbox{Light}{white}{%
+%   \parbox{.905\linewidth}{%
+%   \begin{tabular}{p{1.6cm}p{15.7cm}}
+%       \multirow{5}{*}{\footnotesize{\textbf{Coursework}}}
+%       & \footnotesize{\textbf{Computer Science}: Data Mining, Parallel Models and Algorithms, Pattern Recognition, Image Analysis, Database Software Design, Concurrent and Real-Time Systems, Compilers and Interpreters, Automata Theory and Computational Complexity}\\
+%       & \footnotesize{\textbf{Math, Statistics}: Mathematical Analysis (12 credit hours over 3 semesters), Linear Algebra, Probability Theory, Statistical Methods, Mathematical Statistics, Real Variable Function, Ordinary Differential Function, Stochastic Process}\\
+%       & \footnotesize{\textbf{Economics}: Financial Economics, Financial Econometrics, Time Series Forecasting, Financial Decision Making Under Risk, Behavioral Finance, Economics Analysis of Financial Data, Intermediate Macroeconomics, Advanced Microeconomics}\\
+%   \end{tabular}
+%   }%
+% }
+
+% Employment
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Employment}}}\hfill}\vspace{2mm}\\
+\textbf{\textsc{Software Engineer, Manulife-Sinochem Life Insurance}} \hfill \textcolor{Navy}{Shanghai, May 2016 \textasciitilde\ Sep 2019}
+
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Developed and maintained the bancassurance transaction processing system built on Oracle database \& J2EE. Designed, implemented and integrated new applications to support sales across different banks.
+  \item[\textbullet] Interacted with users to document user requirements and discuss technical feasibility by evaluating the impact of change on the system. Assisted in the development of automated test harnesses to support user testing.
+  \item[\textbullet] Collaborated with vendors to analyze and monitor application performance to mitigate production risks.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Financial Advisor, Sanko Soflan Holdings Japan}} \hfill \textcolor{Navy}{Tokyo, Jun 2015 \textasciitilde\ Feb 2016}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Conducted site visits to newly released and undisclosed housing properties for data collection.
+  \item[\textbullet] Exchanged daily market data with Japanese local real estate companies and small property agencies.
+  \item[\textbullet] Provided investment planning advice for Chinese customers interested in real estate and land in Japan.
+\end{enumerate}
+
+% Internship
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Internship}}}\hfill}\vspace{2mm}\\
+\textbf{\textsc{Business Consultant, Minami-Fuji Consulting Japan}} \hfill \textcolor{Navy}{Wuhan, Dec 2014 \textasciitilde\ Feb 2015}
+
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Partnered with 5 students on a team in an intensive business consulting program that was funded by Japanese companies recruiting Chinese graduates and filmed by the China Phoenix TV.
+  \item[\textbullet] Investigated, analyzed and conducted in-depth on-site research into the local senior housing market.
+  \item[\textbullet] Constructed a 50-page consulting report and presented our marketing strategies to the hiring company.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Forex Analyst, Shanghai Shimmer Investment Company}} \hfill \textcolor{Navy}{Shanghai, Jan 2012 \textasciitilde\ Apr 2012}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Simulated forex trading strategies on MetaTrader4 using historic price data to find risk arbitrage opportunities.
+  \item[\textbullet] Formulated daily market summary reports by analyzing indicators, trading signals, trends and statistics.
+\end{enumerate}
+
+% Online Self-study
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Online Self-Study}}}\hfill}\vspace{2mm}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Completed 40+ Coursera courses in computer science with verified certificates. (on \textsc{Linkedin})
+  \item[\textbullet] Completed 2 Udacity nanodegree programs Data Scientist and AI Quantitative Investment. (on \textsc{Linkedin})
+\end{enumerate}
+
+% Open-source Project
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Open-Source Work}}}\hfill}\vspace{2mm}\\
+\textbf{\textsc{Sentiment Analysis Model, Udacity}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] Built and deployed a deep learning model that predicts the sentiment of a user-provided movie review. Created a simple web app that uses the deployed model and accepts user input. Created a simple web app that uses the deployed model and accepts user input. Created a simple web app that uses the deployed model and accepts user input. Created a simple web app that uses the deployed model and accepts user input.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Zillow's Home Value Prediction, Kaggle}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] Defined similarity metrics between two text documents and identify cases of plagiarism. Performed feature engineering, trained and deployed a custom, plagiarism-classification model.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Simple Dynamo, A Distributed Key-Value Data Store Written in Go}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+    \item[] Implemented a consensus protocol using the Raft algorithm based on vector clock. Robust against single node fail-stop failure.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Sufd, A Simple MultiThread Unix File Daemon Written in C}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] This \textsc{Tcp} server supports signal handling, dynamic concurrency management and reconfiguration. Simulate concurrent reads and writes with synchronization in a heavy-traffic environment.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Silver Bell, A Beautiful Private Cloud Music Player Written in C++}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] Built on Electron.js, featured for minimalist appearance and super performance. Support 3D sound effect, local music library uploading and customized music lists.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Sos, A Simple Operating System}} \href{www.google.com}{\text{  }\(\lhd\)}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[] Assisted with data analysis for the kaggle competition Zillow's Prize. Performed various data processing steps and experimented with feature engineering.
+\end{enumerate}
+
+% Languages & Skills
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Skills}}}\hfill}\vspace{2mm}\\
+\textbf{\textsc{Languages}}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Intermediate proficiency in English (\textsc{Ielts} 8/9, \textsc{Toefl} 104/120, \textsc{Gre} 328/340)
+  \item[\textbullet] Professional proficiency in Japanese (\textsc{Jlpt} N1 Level)
+  \item[\textbullet] Native in Mandarin Chinese
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Software Development}}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Strong fundamentals in computer systems, networks, algorithms, and data structures.
+  \item[\textbullet] Proficient in \textsc{Sql}, \textsc{Pl/sql} and \textsc{Oracle} database, familiar with \textsc{MongoDb} Atlas.
+  \item[\textbullet] Intermediate programming skills of \textsc{Python, Java, C/C++} and \textsc{Go}, comfortable with \textsc{Oop} design.
+  \item[\textbullet] Experience with Emacs, Atom, \textsc{Cl}ion, Py{\small C}harm, IntelliJ \textsc{Idea} and Mathematica.
+  \item[\textbullet] Familiar with Linux OS, Unix Shell, Git/SVN, Markdown/reST/TeX, \textsc{Html}, \textsc{Css}, JavaScript.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Data Science}}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Experience with Apache Spark and Hadoop, familiar with cloud computing.
+  \item[\textbullet] Experience with Caffe, Tensorflow, solid understanding of supervised and reinforcement learning.
+  \item[\textbullet] Good command of data analysis libraries NumPy, Pandas, scikit-learn, matplotlib.
+\end{enumerate}
+
+\vspace{1mm}
+\textbf{\textsc{Statistics}}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Certified SAS Base + Advanced programmer, prior experience with R, Excel formulas and macos.
+  \item[\textbullet] Society of Actuaries (SOA) exams: Exam P, Exam FM.
+\end{enumerate}
+
+% Part-time, Volunteer Work
+\vspace{4mm}
+\uline{\textbf{\textsc{\centerline{\large Part-time, Volunteer Work}}}\hfill}\vspace{2mm}
+\begin{enumerate}[leftmargin=*, topsep=-2mm, itemsep=-2mm]
+  \item[\textbullet] Delivery Driver, Chef Cao's Restaurant \hfill \textcolor{Navy}{Texas, Apr 2013 \textasciitilde\ May 2014}
+  \item[\textbullet] Waiter and Cashier, Taste of China \hfill \textcolor{Navy}{Texas, Apr 2013 \textasciitilde\ May 2014}
+  \item[\textbullet] Community Volunteer, \textsc{Tamu} "The Big Event" \hfill \textcolor{Navy}{Texas, Mar 2013, Mar 2014}
+  \item[\textbullet] Teaching Assistant, Pre-College Summer Camp, \textsc{Shufe} \hfill \textcolor{Navy}{Shanghai, Jul 2012 \textasciitilde\ Aug 2012}
+  \item[\textbullet] High School Student Tutor, \textsc{Shufe} Volunteer Club \hfill \textcolor{Navy}{Shanghai, Sep 2010 \textasciitilde\ Jun 2011}
+\end{enumerate}
+%
+% \vspace{8mm}
+%
+% \begin{center} \large{\textbf{Appendix - Online Certifications}} \end{center}
+%
+% \small
+%
+% \begin{longtable}[c]{|p{4.5cm}|p{12.5cm}|}  % \begin{longtable}[position_on_page]{alignment}
+%   \toprule
+%   \textbf{Institution} & \textbf{Udacity Nanodegree Program Certificate} \\
+%   \midrule
+%   \endfirsthead
+%   IBM Watson, Insight, kaggle & Data Scientist              \\
+%   WorldQuant                  & AI Quantitative Investment  \\
+%   \bottomrule
+% \end{longtable}
+%
+% \vspace{-4mm}
+%
+% \begin{longtable}[c]{|p{4.5cm}|p{12.5cm}|}  % \begin{longtable}[position_on_page]{alignment}
+%   \toprule
+%   \textbf{Institution} & \textbf{Coursera Course Certificate} \\
+%   \midrule
+%   \endfirsthead
+%   UC San Diego/HSE          & Algorithmic Toolbox                                                  \\
+%                             & Data Structures                                                      \\
+%   Stanford University       & Divide and Conquer, Sorting and Searching, and Randomized Algorithms \\
+%                             & Graph Search, Shortest Paths, and Data Structures                    \\
+%                             & Greedy Algorithms, Minimum Spanning Trees, and Dynamic Programming   \\
+%   \midrule
+%   Stanford University       & Machine Learning                                                     \\
+%   University of Michigan    & Applied Machine Learning in Python                                   \\
+%   University of Washington  & Machine Learning Foundations: A Case Study Approach                  \\
+%                             & Machine Learning: Regression                                         \\
+%                             & Machine Learning: Classification                                     \\
+%                             & Machine Learning: Clustering \& Retrieval                            \\
+%   \midrule
+%   IBM                       & What is Data Science                                                 \\
+%                             & Open Source tools for Data Science                                   \\
+%                             & Data Science Methodology                                             \\
+%                             & Databases and SQL for Data Science                                   \\
+%   \midrule
+%   MongoDB Inc.              & Introduction to MongoDB                                              \\
+%                             & MongoDB Aggregation Framework                                        \\
+%   University of Michigan    & Using Databases with Python                                          \\
+%                             & Using Python to Access Web Data                                      \\
+%   \midrule
+%   Rice University           & An Introduction to Interactive Programming in Python (Part 1)        \\
+%                             & An Introduction to Interactive Programming in Python (Part 2)        \\
+%                             & Principles of Computing (Part 1)                                     \\
+%                             & Principles of Computing (Part 2)                                     \\
+%                             & Python Programming Essentials                                        \\
+%                             & Python Data Representations                                          \\
+%                             & Python Data Analysis                                                 \\
+%                             & Python Data Visualization                                            \\
+%   \midrule
+%   Duke University           & Statistics with R: Introduction to Probability and Data              \\
+%                             & Statistics with R: Inferential Statistics                            \\
+%                             & Statistics with R: Linear Regression and Modeling                    \\
+%   \midrule
+%   Atlassian                 & Version Control with Git                                             \\
+%   Johns Hopkins University  & The Unix Workbench                                                   \\
+%   UCSD/McMaster University  & Learn Learning How to Learn: Powerful mental tools                   \\
+%   \bottomrule
+% \end{longtable}
+
+% End of CV body
+% ------------------------------------------------------------------------------
+
+
+\end{document}

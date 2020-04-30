@@ -1,0 +1,387 @@
+---
+title: "Statistical inference with the GSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+    toc: true
+    toc_depth: 5
+---
+
+## Setup
+
+### Load packages
+
+```{r message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+library(shiny)
+```
+
+### Load data
+
+```{r}
+load("gss.Rdata")
+```
+
+* * *
+
+## Part 1: Data
+
+**Source**:  
+
+As per the GSS documentation [website](http://gss.norc.org/get-documentation),
+information on **sampling design and weighting** is recorded in 
+the GSS Codebook - [Appendix A](http://gss.norc.org/documents/codebook/GSS_Codebook_AppendixA.pdf).
+
+**A summary of the appendix**:  
+
+The GSS sampling method has been evolving over time in its history.
+Before 1974, fund support was only given for a modified probability sample.
+Then, the NSF renewal grant, awarded for the 1975-1977 surveys, provided funds for a full probability sample design,
+so the 1975 and 1976 studies were conducted with a transitional sample design, viz., one-half full probability and one-half block quota.
+According to the appendix, block quota is a multi-stage area probability sample to the block or segment level.
+The cost of quota samples is much less than a fully random sample of the same size, but it might also introduce sample
+biases due to not-at-homes. Such biases are said to be relatively small, but there is still considerable controversy 
+and ambiguity about block quota samples. Since 1977, the GSS switched to a full probability sample for the 1977+ surveys, so 
+the transitional sample design is over.
+However, we should also notice that the GSS did not sample non-English speakers until 2006. There is a bias.
+
+**Conclusions**:  
+
+1. Data collected before 1974 can not be considered random samples, results based on such data can not be generalized.
+2. In 1975 and 1976, only half of the sample data is fully random, the other half of block quota data is controversial.
+   Since most textbooks are based on the assumption of simple random samples only, we cannot assume that these samples are
+   representative of the whole population.
+3. Data collected after 1977 is a full probability sample, they are representative of the population and the results can
+   be generalized to the population as well.
+4. Generalization applies to English speakers only because GSS did not sample non-English speakers until 2006.
+5. The GSS data is observational rather than experimental. No experiments have been conducted. Therefore, any conclusions
+   based on the data only establish a correlation(association) relationship between variables, no causal connections can be inferred.
+
+* * *
+
+## Part 2: Research question
+
+As a student, I'm always worried about employment after graduation.
+Getting a good job leads to a life full of happiness, satisfaction and success, 
+but it's hard, it requires a lot of efforts, that's why I'm taking this course on Coursera.
+In this assignment, I need to answer some questions about the education I'm currently working on.
+You know, I could have just make a living by my pretty appearance.  
+
+* In specific, my questions are:  
+    + Does it worth the money to study in a university and earn a better degree?  
+    + What's the proportion of people who have earned a master degree? Is there a difference between males and females?
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+For this project, the data has a large set of observations that span over decades.
+Intuitively speaking, it's not reasonable to group observations in 1980 and 2010 together
+because both the labor market and labor force have changed dramatically during the 30 years gap.
+Also, we mentioned earlier that data before 1977 is somewhat biased and not generalizable.
+Therefore, I will only focus on a subset of the surveys where data was collected after year 2000.
+In this EDA part, I will play with several varibles that might not be related to the research question,
+but just to familiarize myself with the data.
+
+```{r}
+gss <- filter(gss, year >= 2000)  # overwrite the original dataset
+  
+```
+
+Let's first have a glance at the dataset.
+
+```{r}
+glimpse(gss)
+```
+
+After subsetting, now the dataset has 18,945 observations and 114 variables.
+Note that all categorical data are correctly recorded as factors as opposed to characters,
+and all missing values are coded properly as `r NA`.
+
+Next, select the variables of interest, and see the data structure.
+
+```{r}
+gss %>% 
+  select(sex, age, degree, coninc, unemp, satjob, satfin) %>% 
+  str()
+```
+
+What does each variable represents in the codebook?
+
+Variable Name | Description
+------------- | -------------
+sex           | Respondent's sex
+age           | Respondent's age
+degree        | Respondent's highest degree
+coninc        | Total family income in constant dollars
+unemp         | Ever unemployed in the last 10 years
+satjob        | Satifaction with the work
+satfin        | Satifaction with financial situation
+
+To get a sense of a categorical variable, it's a good idea to see how many levels it has
+and visualize the count in each level. Take "joblose" for example, this is an ordinal categorical variable.
+
+```{r}
+levels(gss$satjob)
+```
+
+```{r}
+table(gss$satjob)
+```
+
+```{r}
+barplot(table(gss$satjob))
+```
+
+The output suggests that most people are satisfied with their jobs :)
+But this might not be true, because the function table() automatically filters missing values.
+One possible situation could be that most people are just indifferent about their jobs, they
+are not sure if they are satisfied.
+
+Just out of curiosity, I'm wondering if people with a higher degree tend to be more satisfied with the job.
+
+```{r}
+ggplot(data = gss, aes(x = degree, fill = satjob)) +
+  geom_bar()
+```
+
+The segment barplot shows a relatively balanced level of job satisfaction within each bar,
+it looks like that education level has nothing to do with job satisfaction.
+
+Is there a relationship between age and family income?
+Do older people in general have more family income than younger people?
+
+```{r warning = FALSE}
+ggplot(data = gss, aes(x = age, y = coninc)) +
+  geom_point()
+```
+
+```{r}
+cor(gss$age, gss$coninc, use = "complete.obs")
+```
+
+In the scatterplot, we see that there are points all over the graph, which suggests that age and income
+are not correlated. The `r cor(gss$age, gss$coninc, use = "complete.obs")` also returns a very small
+correlation coefficient of 0.0035, so the two variables should be considered independent.
+
+Is there a relationship between education level and family income?
+Do people with higher degrees in general have more family income?
+
+```{r warning = FALSE}
+ggplot(gss, aes(x = degree, y = coninc)) + geom_boxplot()
+```
+
+The side-by-side boxplot clearly shows a positive relationship between education degrees and income.
+As the level of education goes up, the mean and median of income also increases.
+There are much more outliers among people with lower degrees, which might indicate that hard work can
+compensate for the lack of education and finally leads to a high level of income.
+In addition, the distribution within each degree level is somewhat right skewed, and the IQR
+range becomes wider in higher degree level.
+
+What's the average age of respondents? What does the distribution look like?
+Are the survey respondents normally distributed among all ages?
+
+```{r}
+gss %>%
+  filter(!is.na(age)) %>%
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 1)
+```
+
+```{r}
+qqnorm(gss$age)
+qqline(gss$age)
+```
+
+As expected, both the histogram and the normal probability plot indicate a non-normal distribution,
+but this is understandable. Older people are less likely to participate in the survey due to health conditions,
+and people between the age of 20 and 50 constitute a larger proportion of the whole population.
+Besides, the histogram cuts off at 18 years old and 88 years old, this is because the data was collected only
+among adults, and of course we human beings have a limit of life.
+
+Now, let's see whether the data shows evidence that the labor market is improving every year.
+Concretely, if a market was improving, we would expect to see the average household income increases over time,
+and the increment should be no less than the average inflation rate.
+
+![source: https://www.statbureau.org](https://www.statbureau.org/en/united-states/yearly-inflation-last-10-years.png)
+
+For simplicity, we will ignore the pit in 2008 when financial crisis broke out and just assume that the average
+inflation rate to be around 2 percents.
+
+First create a new variable in the dataframe called "income".
+This column fills missing values with the median of "coninc" which is more robust than the mean against outliers.
+Filling in missing values could introduce additional biases, but the median is our best guess here.
+If we simply remove the observations with missing values, the remaining subset is also biased.
+
+```{r}
+median_coninc <- median(gss$coninc, na.rm = TRUE)
+gss <- gss %>% mutate(income = ifelse(is.na(coninc), median_coninc, coninc))
+sum(is.na(gss$income))
+```
+
+Now that the new column does not contain missing values, next we calculate the average income in each year.
+
+```{r}
+gss %>%
+  group_by(year) %>%
+  summarise(avg_incm = mean(income)) %>%
+  arrange(desc(avg_incm)) %>%
+  ggplot(aes(x = year, y = avg_incm)) + geom_line() + geom_point()
+```
+
+Unfortunately, the graph shows that the average income is fluctuating with the economy around $48,000.
+The average income peaks in 2004, and it drops significantly right after the 2008 financial crisis.
+
+Finally, let's look at the proportion of people who had been unemployed for more than a month,
+excluding missing values.
+
+```{r}
+gss %>%
+  filter(!is.na(unemp)) %>%
+  group_by(sex) %>%
+  summarise(unemp_rate = sum(unemp == "Yes") / n()) %>%
+  arrange(desc(unemp_rate))
+```
+
+The unemployment rates of males and females are close, it looks like there is no gender discrimination 
+in terms of unemployment.
+
+* * *
+
+## Part 4: Inference
+
+* * *
+
+##### Question 1: Does it worth the money to study in a university and earn a better degree?
+
+In the EDA part, we have observed that the average income tends to increase as the degree level goes up.
+Let's test if this is true.
+```{r echo = FALSE, warning = FALSE}
+ggplot(gss, aes(x = degree, y = coninc)) + geom_boxplot()
+```
+
+Since we are comparing means of 3+ groups, the ANOVA test and F-statistic should be used.
+
+<ol>
+<li> $H_0: \mu_{lths} = \mu_{hs} = \mu_{junior} = \mu_{bachelor} = \mu_{graduate}$ </li>
+<li> $H_A$: At least one pair of means are different from each other </li>
+</ol>
+
+```{r}
+anova(lm(coninc ~ degree, data = gss))
+```
+
+The anova outputs a p-value very close to zero, at first glance, the data provides convincing evidence
+to reject the null hypothesis.
+
+However, let's check the conditions for ANOVA:  
+
+* Independence:  
+    + within groups: sample is random, count is less than 10% of that group population  
+    + between groups: respondents in each degree level are independent of each other (non-paired)  
+* Approximate normality: within each group, distributions are nearly normal?  
+
+```{r fig.height = 3, fig.width = 12}
+par(mfrow = c(1, 5))
+for (deg in levels(gss$degree)) {
+  qqnorm(filter(gss, degree == deg)$coninc)
+  qqline(filter(gss, degree == deg)$coninc)
+  }
+```
+
+Unfortunately, it seems that distributions within each group cannot be assumed normal.
+
+* Equal variance: groups should have roughly equal variability
+
+```{r}
+gss %>%
+  filter(!is.na(degree) & !is.na(coninc)) %>%
+  group_by(degree) %>%
+  summarise(count = n(), mean = mean(coninc), sd = sd(coninc))
+```
+
+The variability is not consistent across groups.
+
+In conclusion, we see that the average income is positively related with degree level,
+but the conditions for ANOVA failed because there's a great diversity between groups and
+the income data has many outliers, the distribution within each group is also right skewed
+and is not normally distributed. The graph shows evidence that the median income increases
+as degree level goes up, however, the mean in our case is not robust due to outliers.
+
+Just look at the median, I still believe that in most cases it's worthwhile to pay for a higher degree.
+Since the distribution within group is sparse and skewed, we cannot even effectively test the median
+within a group using bootstrap, it's just garbage in and garbage out.
+
+In order to test this hypothesis, maybe we should based our analysis on the regression model and
+check if the coefficient of degree is significantly greater than 0.
+
+* * *
+
+##### Question 2: What's the proportion of people who have earned a master degree? Is there a gender difference?
+
+First let's calculate the proportion for males and females, respectively.
+
+```{r}
+gss %>%
+  filter(!is.na(degree) & !is.na(sex)) %>%
+  group_by(sex) %>%
+  summarise(graduate_rate = sum(degree == "Graduate") / n(), count = n())
+```
+
+Next we check the conditions for inference for comparing two independent proportions.  
+
+* Independence:  
+    + within groups: random sample, n < 10% of population  
+    + between groups: sampled males and females are independent   
+* Sample size/skew: the sample size is large, and the number of successes and failures are much greater than 10. 
+
+All conditions met, so we can calculate a 95% confidence interval of the proportion difference.
+
+```{r}
+p_male = 0.105
+n_male = 8382
+p_female = 0.0835
+n_female = 10418
+point_estimate = p_male - p_female
+z_score = 1.96
+SE = sqrt(p_male*(1-p_male)/n_male + p_female*(1-p_female)/n_female)
+lower = point_estimate - z_score * SE
+upper = point_estimate + z_score * SE
+print(paste("(", as.character(lower), ", ", as.character(upper), ")", sep = ""))
+```
+
+So the 95% confidence interval is roughly (0.013, 0.030).
+
+Using the inference() function, we expect the same result.
+
+```{r fig.width = 4, fig.align = "center"}
+gss <- gss %>%
+  filter(!is.na(degree) & !is.na(sex)) %>%
+  mutate(is_graduate = ifelse(degree == "Graduate", TRUE, FALSE))
+# source("http://bit.ly/dasi_inference")
+inference(y = is_graduate, x = sex, 
+          data = gss, statistic = "proportion", type = "ci", method = "theoretical", success = TRUE)
+```
+
+It turns out, the result is correct, so we are 95% confident that the proportion of master's degree graduates
+is different bwteen males and females.
+
+Now let's conduct a hypothesis testing on the same question, the result should be consistent with CI.
+Since we have already check the conditions for inference when calculating CI, we will skip this validation step.
+
+<ol>
+<li> $H_0: p_{male} = p_{female}$ </li>
+<li> $H_A: p_{male} \ne p_{female}$ </li>
+</ol>
+
+```{r fig.width = 12}
+inference(y = is_graduate, x = sex, data = gss, statistic = "proportion", type = "ht", null = 0, 
+          alternative = "twosided", method = "theoretical", success = TRUE)
+```
+
+The output gives us a p-value of < 0.0001, so we reject the null hypothesis. 
+The conclusion is the same as before, and the two methods actually agree with each other.
