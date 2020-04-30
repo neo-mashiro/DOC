@@ -1,5 +1,5 @@
 ## TeX->PDF
-- [000_CV](https://github.com/neo-mashiro/DOC/blob/master/CV.pdf) - My personal resume, feel free to use the template if you like it
+- [000_CV](https://github.com/neo-mashiro/DOC/blob/master/000_CV.pdf) - My personal resume, feel free to use the template if you like it
 - [564_concensus](https://github.com/neo-mashiro/DOC/blob/master/564_concensus.pdf) - A cursory review of practical consensus protocols in distributed systems
 - [567_advanced_algorithms](https://github.com/neo-mashiro/DOC/blob/master/567_advanced_algorithms.pdf) - Exercises for Advanced Algorithms
 - [latex](https://github.com/neo-mashiro/DOC/blob/master/latex.pdf) - LaTeX template notebook
