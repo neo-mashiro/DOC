@@ -7,7 +7,7 @@
 ## R-Markdown->HTML
 - [C01_brfss_eda](https://github.com/neo-mashiro/DOC/blob/master/C01_brfss_eda.html) - Exploring the BRFSS data
 - [C01_gss_inference](https://github.com/neo-mashiro/DOC/blob/master/C01_gss_inference.html) - Statistical inference with the GSS data
-- [C01_multiple_linear_regression](https://github.com/neo-mashiro/DOC/blob/master/C01_gss_inference.html) - Modeling and prediction for movies
+- [C01_multiple_linear_regression](https://github.com/neo-mashiro/DOC/blob/master/C01_multiple_linear_regression.html) - Modeling and prediction for movies
 
 ## HTML, CSS & JavaScript
 - [W01_index](https://github.com/neo-mashiro/DOC/blob/master/W01_index.html) - Some useful elements mixed on a single webpage
