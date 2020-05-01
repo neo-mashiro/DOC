@@ -87,8 +87,8 @@ http://www.github.com/
 This is the [emoji cheatsheet](https://www.webpagefx.com/tools/emoji-cheat-sheet/).
 
 ### image
-![She is maho](http://august-soft.com/daito/bnx/bnx150x600_14.jpg)
-![She is maho](http://august-soft.com/daito/bnx/bnx150x600_01.jpg)
-![She is maho](http://august-soft.com/daito/bnx/bnx150x600_05.jpg)
-![She is maho](http://august-soft.com/daito/bnx/bnx150x600_08.jpg)
-![She is maho](http://august-soft.com/daito/bnx/bnx150x600_09.jpg)
+![She is maho](http://august-soft.com/daito/bnx/bnx150x600_14.jpg?)
+![She is maho](http://august-soft.com/daito/bnx/bnx150x600_01.jpg?)
+![She is maho](http://august-soft.com/daito/bnx/bnx150x600_05.jpg?)
+![She is maho](http://august-soft.com/daito/bnx/bnx150x600_08.jpg?)
+![She is maho](http://august-soft.com/daito/bnx/bnx150x600_09.jpg?)
