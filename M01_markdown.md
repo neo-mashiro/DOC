@@ -59,6 +59,28 @@ alpha = 1e-3
 print("p = {:g}".format(p_value))
 ```
 
+### a collapsible section with markdown
+<details>
+  <summary>View details</summary>
+  
+  1. Any element
+  2. of markdown
+     * can be nested
+     * inside this tag
+</details>
+
+### a collapsible section with code
+<details>
+  <summary>View code</summary>
+  
+  ```javascript
+    function helloWorld() {
+        console.log('Hello');
+        return 'World!';
+    }
+  ```
+</details>
+
 ### task lists
 - [x] @mentions, #refs, [links](), **formatting**, and <del>tags</del> supported
 - [x] list syntax required (any unordered or ordered list supported)
