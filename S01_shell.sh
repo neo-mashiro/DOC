@@ -1,3 +1,7 @@
+# ==============================================================================
+# Google Shell Style Guide - https://google.github.io/styleguide/shellguide.html
+# ==============================================================================
+# TL;DR
 # ------------------------------------------------------------------------------
 # shell notations
 # ------------------------------------------------------------------------------
@@ -70,6 +74,9 @@ a                 # Everyone above
 
 chmod 777 <file>  # set full permission on <file>, r=4, w=2, x=1，so 777 = rwxrwxrwx
 chmod -R 777 *    # set full permission recursively on all files in the current directory
+
+chown new_owner file_name         # change file owner, ls -l to confirm
+chown newuser:newgroup file_name  # change file group, ls -l to confirm
 
 
 # ------------------------------------------------------------------------------
@@ -498,7 +505,7 @@ addseq 1 5 3 8 4 6 3  # 30
 
 
 # ------------------------------------------------------------------------------
-# remote machine
+# remote machine (cloud vps)
 # ------------------------------------------------------------------------------
 
 $ telnet www.google.com 80  # remote login
@@ -527,16 +534,43 @@ $ emacs -nw /etc/services  # list all port numbers in your operating system
 $ ssh root@159.89.201.176  # ssh: Secure Shell
 $ ssh wlu@linux.ubishops.ca
 
-root@159.89.201.176: scp root@159.89.201.176:/root/remote.txt local.txt  # download from server (scp: Secure Copy)
-root@159.89.201.176: scp -r root@159.89.201.176:/root/folder ~/cloud/folder  # use -r (recursive) flag to transfer an entire folder
-
+$ scp root@159.89.201.176:/root/remote.txt local.txt  # download from server (scp: Secure Copy)
+$ scp -r root@159.89.201.176:/root/folder ~/cloud/folder  # use -r (recursive) flag to transfer an entire folder
 $ scp local.txt root@159.89.201.176:/root/remote.txt  # upload to server
 $ scp -r ../cloud root@159.89.201.176:/root/cloud  # use -r (recursive) flag to transfer an entire folder
-$ sshpass -f "home/PSWD" scp -r ./local.txt root@159.89.201.176:/home/docs  # automated upload (non-interactive password authentication)
 
+$ rsync local/path/ root@159.89.201.176:/root/cloud  # sync files and directories between a local and a remote machine
+
+$ sshpass -f "home/PSWD" scp -r ./local.txt root@159.89.201.176:/home/docs  # automated upload (non-interactive password authentication)
+$ ssh-agent  # yet another passwordless authentication
+$ ssh-add    # yet another passwordless authentication
+
+# to redirect requests between a local and a remote machine, ssh -L -R -D could be very helpful
+# watch youtube videos to learn more about ssh tunneling and port forwarding (local/remote/dynamic)
+$ ssh -L 8888:159.89.201.176:9001 root@159.89.201.176
+$ ssh -R 8888:localhost:9001 root@159.89.201.176
+
+$ tmux  # work in multiple terminal windows, makes it easy to manage windows and sessions on remote ssh machine
+        # watch youtube tutorials to learn more if you work on ssh servers a lot
+
+root@159.89.201.176: uname -a  # check kernel version
+
+# curl - a command line data transfer tool, powerful and fast (written in C)
 root@159.89.201.176: curl -O https://github.com/neo-mashiro/DOC/blob/master/README.md  # curl -O <url> for download
 root@159.89.201.176: curl http://httpbin.org/get  # curl without any flags = a HTTP GET request
+# wget - a nice alternative to curl, but somewhat ancient
+root@159.89.201.176: wget -r -np -R "index.html*" http://java.com/pdfs/  # recursively download files from a web directory
 
+# httpie - a modern alternative, more user-friendly, easier to interact with, but slower (written in Python)
+// https://httpie.org/
+// https://httpie.org/docs
+root@159.89.201.176: pip3 install httpie  # httpie uses *f-string literals, so make sure you have python >= 3.6.2
+root@159.89.201.176: http PUT httpbin.org/put X-API-Token:123 name=John  # with httpie, http requests are made simple
+root@159.89.201.176: http -f POST httpbin.org/post hello=World  # forms
+root@159.89.201.176: http httpbin.org/post < files/data.json  # upload a file using redirected input
+root@159.89.201.176: http httpbin.org/image/png > image.png   # download a file and save it via redirected output
+
+# automate tasks on remote server with cron
 root@159.89.201.176: ps -A | grep "cron"  # list automated cron tasks
 root@159.89.201.176: crontab -e  # (cron table edit)
 
@@ -557,6 +591,7 @@ root@159.89.201.176: crontab -e  # (cron table edit)
 # 1. Write a bash script that takes a file path as an argument and copies that file to a designated folder on your server.
 # 2. Find a file online that changes periodically, then write a program to download that file every time it changes.
 # 3. Try creating your own Twitter or GitHub bot with the Twitter API or the GitHub API.
+# 4. Build a web server or database, hold and deploy your application on the remote server.
 # ------------------------------------------------------------------------------
 
 
@@ -595,7 +630,7 @@ who
 
 
 # ------------------------------------------------------------------------------
-# commonly used commands in Linux Ubuntu 16.04 LTS
+# commonly used commands on my Linux PC
 # ------------------------------------------------------------------------------
 
 xrandr -q | grep " connected"
@@ -692,6 +727,7 @@ sudo apt-get update
 sudo apt-get install atom
 sudo apt-get purge --auto-remove clementine
 sudo apt-get remove --auto-remove clementine
+# similar use of yum, dnf, pacman on other linux distributions
 
 tree -dh > tree_view.md
 
@@ -752,3 +788,206 @@ do
     eval_guess $input
   fi
 done
+
+
+# ------------------------------------------------------------------------------
+# more comprehensive stuff
+# ------------------------------------------------------------------------------
+
+# check command type (executable / shell builtin / alias)
+type command
+type type
+type git
+type man
+type pip3
+
+# job management
+bc           # run in foreground, by default
+^Z           # ctrl + z, suspend or stop a job, return the terminal back to user
+sleep 200 &  # run in background
+sleep 200 &  # run in background
+jobs         # list all jobs
+bg % 1       # switch job 1 to background, suspended jobs will continue
+fg % 2       # switch job 2 to foreground, suspended jobs will continue
+bg           # switch the most recent job to background
+fg           # switch the most recent job to foreground
+^C           # ctrl + c, send interrupt signal
+kill -SIGTERM 21748  # send a signal to a process
+
+ln source.svg target.svg     # create hard link
+ln -s source.svg target.svg  # create soft (symbolic) link
+
+du -sh *  # list disk usage for each main folder
+ls -i     # list files with their inode numbers
+df -h     # list mounted filesystems (logically connected to the main filesystem)
+df -hi    # list inodes usage for each mounted filesystem
+
+lsblk  # list all available storage device
+fdisk  # manage disk partitions, dangerous, use with caution
+mount  # mount or unmount a device to the filesystem, dangerous
+mkfs   # make a filesystem, dangerous
+
+sudo fdisk -l  # list all disk partitions
+sudo fdisk -l /dev/nvme0n1p1  # list disk partition on a specific disk
+
+TAB  # auto complete / list available commands
+^R   # ctrl + r, type to search through command history, press ctrl-r repeatedly to cycle through more matches
+     # press Enter to execute the found command, or press the right arrow key -> to edit found command
+^W   # delete last word
+^U   # delete whole line
+^A   # move cursor to the beginning of line
+^E   # move cursor to the end of line
+^K   # kill to the end of line
+^L   # clear the screen, = clear
+^D   # close the terminal, = exit
+
+set -o vi     # set to vim-style key bindings
+set -o emacs  # set back to default key bindings
+
+history -n  # list the last n commands
+!n          # the n-th command
+!!          # the last command
+
+cd    # takes you home
+cd ~  # takes you home
+cat ~/.profile   # in relative path, refer to the home directory as ~
+"$HOME/.bashrc"  # in shell scripts, refer to the home directory as $HOME
+
+man xargs   # enhanced pipeline utility, xargs is very powerful
+xargs echo
+
+ls -1 | xargs file {}
+ls -1 | xargs -I{} file {}  # -I{} is handy for placeholder replacement
+
+git ls-files | grep .py | xargs wc -l          # count number of lines in a git repository
+git ls-files | grep .py | xargs -I{} wc -l {}  # see how this one differs from above
+
+find . -maxdepth 1 -name "*.pdf" -print0 | xargs -0 rm  # remove all pdf files but avoid argument list too long error
+
+pstree -p  # view the process tree
+
+ps -ef | grep ...  # search processes by matching the whole line output of `ps` including path and arguments
+ps aux | grep ...  # search and kill processes this way is not efficient
+pgrep ...          # search processes by matching against the process (executable) names, which is more efficient
+
+pgrep firefox              # search a process id by name
+pgrep -u root              # search all process ids owned by root
+pgrep -u neo-mashiro atom  # search a specific process owner by a user
+pgrep -f "atom"            # grep by full command line (including path and arguments)
+
+pkill ping        # signal process(es) by name, SIGTERM is sent by default
+pkill -9 sufd     # SIGKILL
+pkill -HUP ping   # SIGHUP, often used to notify processes to reload configuration files and restart
+pkill -STOP ping  # SIGSTOP, often used to suspend processes temporarily, but will later resume work
+pkill -f "ping www.google.com"  # match against the full command line
+
+: '@ redirect I/O streams
+   > is the redirect operator, >> is the append operator
+   1> redirects the stdout (file descriptor 1 is typically omitted, so 1> is equivalent to >)
+   2> redirects the stderr
+   &> redirects both
+   1>> appends the stdout
+   2>> appends the stderr
+   &>> appends both (only supported in bash version 4+ and alike)
+'
+command < /dev/null         # redirect stdin to /dev/null (close standard input)
+command > file              # redirect stdout to a file
+command > file1 2> file2    # redirect stdout, stderr to different files
+command > file1 2> &1       # redirect both stdout and stderr to the same file (2> &1 redirects stderr to stdout)
+command &> file             # redirect both stdout and stderr to the same file, a shorthand
+command >> file             # append stdout to a file
+command >> file1 2>> file2  # append stdout, stderr to different files
+command >> file 2> &1       # append both stdout and stderr to the same file
+command &>> file            # append both stdout and stderr to the same file, a shorthand
+
+: '@ nohup: run a program with SIGHUP ignored
+   nohup allows a command/script (usually in background) to be running even after logout.
+   by default, stdout/stderr will be redirected to ./nohup.out, unless otherwise specified.
+   this is typically used to avoid terminating jobs when logging off from a remote SSH session.
+   unlike a daemonized process which is meant to run forever, nohup is for a one-time single use.
+'
+nohup command [arguments...] &
+nohup your-script.sh &
+nohup ./foo.sh > foo.out 2> foo.err < /dev/null &  # redirect stdout to foo.out, stderr to foo.err, stdin to /dev/null
+
+# check what processes are listening (both TCP and UDP)
+sudo netstat -lntpu
+lsof -iTCP
+lsof -iTCP -sTCP:LISTEN -P -n
+lsof -i :443  # check what processes are using port 443
+
+# how long the system has been running?
+w
+uptime
+htop  # an enhanced version of top that interactively shows process usage and sys info (CPU, memory, swap, uptime, etc.)
+
+# understand how to setup configurations in
+~/.profile
+~/.bash_profile
+~/.bashrc
+~/.zshrc
+
+# process substitution: treat <(command) output as a file
+diff /etc/hosts <(ssh somehost cat /etc/hosts)
+diff <(sort file1) <(sort file2)
+
+# be familiar with multi-line here document (heredoc)
+https://en.wikipedia.org/wiki/Here_document
+https://stackoverflow.com/questions/2953081/how-can-i-write-a-heredoc-to-a-file-in-bash-script
+
+man ascii  # view the ascii table, there's no need to google
+
+# use `sudo -i -u user command [arguments...]` to run commands as another user
+sudo -i -u guest ls -a
+sudo -i -u root whoami
+sudo -i -u neo-mashiro whoami
+
+# the max length of the command line argument is limited to 128K within the Linux kernel
+grep ARG_MAX /usr/include/linux/limits.h  #define ARG_MAX 131072  /* # bytes of args + environ for exec() */
+
+rm *.txt  # Error: Argument list too long
+find ./ -name '*.txt' -print0 | xargs -0 -n 10 rm  # use xargs to work around this error
+
+locate something  # the most efficient way to find a file by name, anywhere on your computer
+
+diff -u file1 file2               # diff two files
+diff -y file1 file2               # a side-by-side diff of two files, easier to look at
+diff -y file1 file2 | colordiff   # with colors its even more straightforward (need to install colordiff)
+diff -u file1 file2 > patch.diff  # create a patch file
+patch file1 < patch.diff          # apply a patch file to the source
+
+lsattr  # list file attributes
+chattr  # change file attributes
+
+sudo chattr +i /critical/file/or/directory  # protect critical files/directories by making them immutable
+lsattr /critical/file/or/directory          # ----i---------e----, i stands for immutable
+rm -f /critical/file/or/directory           # operation not permitted (rm, mv, ln ... on immutable files will fail)
+
+sudo chattr -i /critical/file/or/directory  # make files back to mutable
+lsattr /critical/file/or/directory          # --------------e----
+mv /critical/file/or/directory ./trash      # success
+
+sudo chattr +a +s +u password.txt  # set files to be "append-only", "secure deletion", "undeletable", etc...
+sudo chattr -a -s -u password.txt  # clear these flags
+
+getfacl -R /some/path > permissions.txt  # save file permissions
+setfacl --restore=permissions.txt        # restore file permissions
+
+cat file  # view a file in terminal, normal way
+nl file   # view a file in terminal, but add line numbers
+
+time command  # execute and time a command or program, similar to %timeit in Python
+time ./foo.sh
+time sleep 10
+timeout 10 ping www.google.com      # execute a command or program with a given time limit (in seconds)
+timeout 20 ssh alice@videotron.net  # will abort after 20 seconds
+timeout 20 telnet www.example.com 9001
+watch command       # run a command repeatedly and show results so you can watch it change over time
+watch -n 5 command  # change time interval to 5 seconds (2 seconds by default)
+watch "ps aux | grep daemon"       # run the command and update results every 2 seconds
+watch -n 3 "ps aux | grep daemon"  # run the command and update results every 3 seconds
+
+id     # show user/group identity info
+id -u  # check your user-id (especially useful on a remote server when you are not the root)
+echo $((8000 + `id -u`))        # manipulate your user-id and use it as an argument
+./sufd -f $((10000 + `id -u`))  # use your user-id as the port number (e.g. to avoid collision with other users)

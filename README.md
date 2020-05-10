@@ -26,7 +26,7 @@ Archive of documents, course reports, previous works & exercises
 
 ## Git & Shell
 - [S01_Git](https://github.com/neo-mashiro/DOC/blob/master/S01_Git.sh) - Git notebook
-- [S01_commands](https://github.com/neo-mashiro/DOC/blob/master/S01_commands.sh) - Unix shell notebook
+- [S01_shell](https://github.com/neo-mashiro/DOC/blob/master/S01_shell.sh) - Unix shell notebook
 
 ## Jupyter Notebook
 - [C02_algorithm1](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/C02_algorithm1.ipynb) - Algorithms interactive practice notebook 1
