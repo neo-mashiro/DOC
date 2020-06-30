@@ -61,24 +61,24 @@ print("p = {:g}".format(p_value))
 
 ### a collapsible section with markdown
 <details>
-  <summary>View details</summary>
+<summary>View details</summary>
   
-  1. Any element
-  2. of markdown
-     * can be nested
-     * inside this tag
+1. Any element
+2. of markdown
+    * can be nested
+    * inside this tag
 </details>
 
 ### a collapsible section with code
 <details>
-  <summary>View code</summary>
+<summary>View code</summary>
   
-  ```javascript
-    function helloWorld() {
-        console.log('Hello');
-        return 'World!';
-    }
-  ```
+```javascript
+function helloWorld() {
+    console.log('Hello');
+    return 'World!';
+}
+```
 </details>
 
 ### task lists
