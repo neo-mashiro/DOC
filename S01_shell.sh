@@ -633,6 +633,12 @@ who
 # commonly used commands on my Linux PC
 # ------------------------------------------------------------------------------
 
+# in terminal, normal cut/copy/paste shortcuts ctrl+x/c/v have different meanings
+# so they won't work, instead, we use ctrl+shift+x/c/v
+ctrl+shift+x  # cut
+ctrl+shift+c  # copy
+ctrl+shift+v  # paste
+
 xrandr -q | grep " connected"
 xrandr --output HDMI-1-1 --brightness 0.5
 xset m 0/0 0
