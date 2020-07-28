@@ -10,15 +10,32 @@ show variables like 'character%';
 show variables;  --show all SYSTEM VARIABLES
 show status;  --server status
 
--- modify the configuration file to fix Chinese encoding, must restart service to take effect
--- $ sudo nano /etc/mysql/my.cnf
--- $ /etc/init.d/mysql stop
--- $ /etc/init.d/mysql start
-
 show variables like '%autocommit%';
 set AUTOCOMMIT=0;  --turn off autocommit
 
 select database();
+
+-------------------------------------------------------------------------
+--modify the configuration file to fix Chinese encoding, must restart service to take effect
+
+$ sudo nano /etc/mysql/my.cnf
+
+/*
+[client]
+default-character-set=utf8mb4
+
+[mysql]
+default-character-set=utf8mb4
+
+[mysqld]
+character_set_server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+*/
+
+$ /etc/init.d/mysql stop
+$ /etc/init.d/mysql start
+
+ALTER TABLE table_name CONVERT TO CHARACTER SET utf8mb4;  --may be necessary as well
 
 -------------------------------------------------------------------------
 create database SECRET;
