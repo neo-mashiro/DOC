@@ -10,6 +10,11 @@ show variables like 'character%';
 show variables;  --show all SYSTEM VARIABLES
 show status;  --server status
 
+-- modify the configuration file to fix Chinese encoding, must restart service to take effect
+-- $ sudo nano /etc/mysql/my.cnf
+-- $ /etc/init.d/mysql stop
+-- $ /etc/init.d/mysql start
+
 show variables like '%autocommit%';
 set AUTOCOMMIT=0;  --turn off autocommit
 
@@ -34,7 +39,7 @@ desc secret;
 select count(*) from secret;
 
 /* scripting in mysql */
-source /home/neo-mashiro/Documents/.file/masked.sql;  --load and execute script
+source /home/neo-mashiro/Documents/.doc/.masked.sql;  --load and execute script
 
 -------------------------------------------------------------------------
 /* A sample */
