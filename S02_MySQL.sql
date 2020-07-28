@@ -23,11 +23,11 @@ select database();
 show tables;
 
 create table secret (account varchar(30), id varchar(100), password varchar(100) not null, answer varchar(100),
-remark varchar(200), trxn_dt DATE not null, primary key (account, id)
+remark varchar(200), primary key (account, id)
 );
 
 show tables;
-show create table secret\G;
+show create table secret;
 
 desc secret;
 
