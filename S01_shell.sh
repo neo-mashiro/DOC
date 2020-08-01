@@ -943,6 +943,16 @@ htop  # an enhanced version of top that interactively shows process usage and sy
 diff /etc/hosts <(ssh somehost cat /etc/hosts)
 diff <(sort file1) <(sort file2)
 
+# pattern substitution: replace some pattern in a string variable with another pattern
+${variable/old_str/new_str}
+
+code="000111"
+echo ${code/0/4}   # 400111, replace the first "0" with "4"
+echo ${code//0/4}  # 444111, replace all "0" with "4"
+
+path="./data/swi.nii.gz"
+echo ${path/.nii.gz/.m}  # ./data/swi.m
+
 # be familiar with multi-line here document (heredoc)
 https://en.wikipedia.org/wiki/Here_document
 https://stackoverflow.com/questions/2953081/how-can-i-write-a-heredoc-to-a-file-in-bash-script
