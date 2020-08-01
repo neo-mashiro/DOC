@@ -904,12 +904,12 @@ pkill -f "ping www.google.com"  # match against the full command line
 '
 command < /dev/null         # redirect stdin to /dev/null (close standard input)
 command > file              # redirect stdout to a file
-command > file1 2> file2    # redirect stdout, stderr to different files
-command > file1 2> &1       # redirect both stdout and stderr to the same file (2> &1 redirects stderr to stdout)
+command > file1 2>file2     # redirect stdout, stderr to different files
+command > file1 2>&1        # redirect both stdout and stderr to the same file (2> &1 redirects stderr to stdout)
 command &> file             # redirect both stdout and stderr to the same file, a shorthand
 command >> file             # append stdout to a file
-command >> file1 2>> file2  # append stdout, stderr to different files
-command >> file 2> &1       # append both stdout and stderr to the same file
+command >> file1 2>>file2   # append stdout, stderr to different files
+command >> file 2>&1        # append both stdout and stderr to the same file
 command &>> file            # append both stdout and stderr to the same file, a shorthand
 
 : '@ nohup: run a program with SIGHUP ignored
