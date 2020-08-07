@@ -1,3 +1,6 @@
+// Sample Database
+https://dev.mysql.com/doc/employee/en/
+
 mysql --version
 mysql --help
 
