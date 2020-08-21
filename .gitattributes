@@ -2,7 +2,8 @@
 *.ipynb linguist-detectable=false
 *.sql linguist-detectable=true
 
-C01_brfss_eda.html linguist-documentation=true
-C01_gss_inference.html linguist-documentation=true
-C01_multiple_linear_regression.html linguist-documentation=true
-W02_Life_on_A4.html linguist-documentation=true
+brfss_eda.html linguist-documentation=true
+gss_inference.html linguist-documentation=true
+multiple_linear_regression.html linguist-documentation=true
+
+"Life[[:space:]]on[[:space:]]A4.html" linguist-documentation=true
