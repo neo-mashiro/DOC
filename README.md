@@ -1,5 +1,5 @@
 # DOC
-Archive of documents, course reports, previous works & exercises
+Archive of documents, reports, previous works & exercises, for quick reference
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/neo-mashiro/DOC?label=Doc%20Size&style=social)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-blue.svg?style=plastic)](http://creativecommons.org/publicdomain/zero/1.0/)
