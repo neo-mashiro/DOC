@@ -1,0 +1,419 @@
+\documentclass[11pt]{article}
+
+
+% preamble
+\usepackage[margin=1in]{geometry}
+\usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathpazo}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{enumitem}  % control the indentation value of an enumerate environment
+\usepackage{hyperref}
+\usepackage{siunitx}
+\sisetup{
+  round-mode = places,
+  round-precision = 2,
+}
+
+\usepackage[backend=bibtex,style=ieee]{biblatex}
+\bibliography{advanced_algorithms}
+
+\usepackage[type={CC}, modifier={by-nc-sa}, version={3.0},]{doclicense}  % license
+
+\usepackage{algpseudocode}  % pseudocode block
+\usepackage{algorithm}  % pseudocode block
+
+\usepackage{pgf,tikz,pgfplots}  % draw mathematics graphs
+\pgfplotsset{compat=1.15}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+% \pagestyle{empty}  % suppress subsequent page numbers
+\renewcommand{\figurename}{\hspace{-12mm}Example}  % override default figure caption title
+
+\title{Exercises for Advanced Algorithms}
+\author{Solution by: \href{mailto:neo-mashiro@hotmail.com}{Wentao Lu}}
+\date{}
+
+
+% document
+\begin{document}
+  \newcommand{\solution}{\noindent \textbf{\textsc{Solution:}} \dotfill \vspace{2mm}}  % solution title
+  \definecolor{ffqqqq}{rgb}{1,0,0}  % node color in hypercube
+  \definecolor{qqqqff}{rgb}{0,0,1}  % node color in hypercube
+
+  \maketitle
+  \pagenumbering{arabic}
+
+  % \rule[raise]{width}{height}
+  \noindent \hspace{\fill} Models of computation \rule[0mm]{20mm}{2mm} (20\%)\\
+  \hspace*{\fill} NP-complete \rule[0mm]{55mm}{2mm} (55\%)\\
+  \hspace*{\fill} Approximation algorithms \rule[0mm]{40mm}{2mm} (40\%)\\
+  \hspace*{\fill} Linear programming \rule[0mm]{30mm}{2mm} (30\%)\\
+  \hspace*{\fill} Computational geometry \rule[0mm]{30mm}{2mm} (30\%)\\
+  \hspace*{\fill} Parallel models and algorithms \rule[0mm]{40mm}{2mm} (40\%)
+
+  \section{NP-complete}
+    Provide a proof of NP-completeness for the two-machine scheduling problem by formulating a reduction from the knapsack problem and state its corresponding optimization problem.
+    \begin{itemize}[leftmargin=*]
+      \item \textsc{Two-machine scheduling:} Given the execution time $a_1, a_2 \dots, a_n$ of $n$ independent tasks and a deadline $D$, is it possible to schedule the $n$ tasks on two identical machines in a non-preemptive fashion (meaning that once a task starts executing it must run to completion) such that all the task complete by the deadline $D$.
+      \item \textsc{Knapsack:} Given $n$ objects with volumes $v_i$ and prices $s_i$, \(1 \le i \le n\), a knapsack of volume $V$, and a constant $S > 0$, is there a subset $N' \subseteq \{1, \dots, n\}$ such that $\Sigma_{i \in N'} v_i < V$ (the objects in $N'$ can be placed in the knapsack) and $\Sigma_{i \in N'} s_i \geq S$ (their price exceeds the given limit $S$)?
+    \end{itemize}
+
+    \solution\\
+    The complete proof consists of two steps. Given any candidate solution (purported certificate) of this problem which divides the $n$ independent tasks into two bins, we can easily compute the total execution time of tasks in each bin, and then check if both of them $\leq D$. Since the solution can be verified in linear time, by definition\autocite[1049]{Cormen09} it is an NP problem.\\
+
+    After Stephen Cook proved 3-SAT to be the first known NP-complete problem in 1971\autocite{Cook71}, the next year Richard Karp further proved that another 21 common computational problems are all NP-complete\autocite{Karp72}, one of which is the knapsack problem. To prove NP-hardness, we will show that the knapsack problem is reducible to the two-machine scheduling problem.\\
+
+    For every instance of the knapsack problem, construct $n + 2$ independent tasks with execution time $\{a_1, \dots, a_{n+2}\}$ and a deadline $D = \Sigma_{i=1}^{n} a_i + 2$. Let
+    \begin{align*}
+      a_i     &= v_i + s_i \,,\, 1 \le i \le n\\
+      a_{n+1} &= \Sigma_{i \in P} v_i + \Sigma_{i \in P} s_i + 2\\
+      a_{n+2} &= \Sigma_{i=1}^{n} a_i - \Sigma_{i \in P} v_i - \Sigma_{i \in P} s_i + 2
+    \end{align*}
+
+    where $P$ denotes the set of items placed in the knapsack. It is evident that this mapping takes polynomial time in the size of input. Now let's prove that this translation is indeed a reduction.\\
+
+    $\Rightarrow$ First, suppose that the knapsack problem has a true instance, which means there is indeed a subset of items $P \subseteq \{1, \dots, n\}$ such that
+    \begin{align*}
+      \Sigma_{i \in P} v_i &< V\\
+      \Sigma_{i \in P} s_i &\geq S
+    \end{align*}
+
+    Let
+    \begin{align*}
+      M_1 &= \{a_i \mid i \in P\} \cup \{a_{n+2}\}\\
+      M_2 &= \{a_i \mid i \notin P\} \cup \{a_{n+1}\}
+    \end{align*}
+
+    Then we have
+    \begin{align}
+      \text{the sum of } M_1 &= \Sigma_{i \in P} v_i + \Sigma_{i \in P} s_i + \Sigma_{i=1}^{n} a_i - \Sigma_{i \in P} v_i - \Sigma_{i \in P} s_i + 2 = \Sigma_{i=1}^{n} a_i + 2\\
+      \text{the sum of } M_2 &= \Sigma_{i=1}^{n} a_i - \Sigma_{i \in P} v_i - \Sigma_{i \in P} s_i + \Sigma_{i \in P} v_i + \Sigma_{i \in P} s_i + 2 = \Sigma_{i=1}^{n} a_i + 2
+    \end{align}
+
+    From (1) and (2), it's clear that we have $M_1=M_2=D$, also notice that $M_1 \cup M_2 $ is the set of all tasks, therefore we have found a feasible schedule for two identical machines.\\
+
+    $\Leftarrow$ Conversely, suppose that the translated two-machine scheduling problem has a true instance, so the set of $n + 2$ independent tasks can be divided into two subsets, which can be scheduled on two machines $M_1$ and $M_2$, respectively, by the deadline $D = \Sigma_{i=1}^{n} a_i + 2$.\\
+
+    Since execution time must be nonnegative, and notice that $a_{n+1} + a_{n+2} = \Sigma_{i=1}^{n} a_i + 4>D$, this means $a_{n+1}$ and $a_{n+2}$ must not be executed on the same machine. Without loss of generality, assume that $a_{n+2}$ is scheduled on $M_2$, then the execution time of the rest of the tasks scheduled on $M_2$ must sum up to
+    \begin{align*}
+      D - a_{n+2} = \Sigma_{i=1}^{n} a_i + 2 - a_{n+2} = \Sigma_{i \in P} v_i + \Sigma_{i \in P} s_i
+    \end{align*}
+
+    As per our reduction assumption, it imples that this subset $P \subseteq \{1, \dots, n\}$ has the property
+    \begin{align*}
+      \Sigma_{i \in P} v_i &< V\\
+      \Sigma_{i \in P} s_i &\geq S
+    \end{align*}
+
+    Thus, it makes a true instance of the knapsack problem as well.\\
+
+    Now we have \textsc{Knapsack} $\leq_p$ \textsc{Two-machine scheduling}, which implies that the two-machine scheduling problem is at least as hard as the knapsack. This completes our proof that two-machine scheduling is also NP-complete.\\
+
+    The optimization variant of this is the so-called \textit{makespan} problem, in our case with two machines denoted by $P2||C_{max}$\autocite{Schuurman00}, which can be stated as: Given the execution time $a_1, a_2 \dots, a_n$ of $n$ independent tasks, find a way to schedule the $n$ tasks on two identical parallel machines in a non-preemptive fashion, so as to minimize the maximum task completion time. In other words, we would like to do our best to equally assign the $n$ tasks to both machines, such that the total execution time on the machine that finishes last is minimized. This variant is NP-hard.\autocite{Karp72}
+
+  \section{Approximate Maximum Clique}
+    Let $G = (V,E)$ be an undirected graph. For integer $k \geq 1$ define $G^{(k)} = (V^{(k)}, E^{(k)})$ such that $V^{(k)} = \{(v_1, v_2, \dots, v_k) | v_i \in V, 1 \leq i \leq k\}$ and $((v_1, v_2, \dots, v_k), (w_1 ,w_2 ,\dots ,w_k)) \in E^{(k)}$ iff either $(v_i, w_i) \in E$ or $v_i = w_i$ for all $1 \leq i \leq k$.
+    \begin{enumerate}[leftmargin=*]
+      \item Prove $|C^{(k)}| = |C|^k$, where $C^{(k)}$ and $C$ are the maximum cliques of $G^{(k)}$ and $G$, respectively.
+      \item Argue that the existence of an approximation algorithm for finding the maximum clique with a constant approximation ratio implies the existence of a polynomial-time approximation scheme for finding the maximum clique.
+    \end{enumerate}
+
+    \solution
+    \begin{enumerate}[leftmargin=*, topsep=0pt]
+      \item Let $V' = \{(v_1, v_2, \dots, v_k) | v_i \in C, 1 \leq i \leq k\} \subseteq V^{(k)}$, where $C$ is the maximum clique of $G$, so every pair of vertices $(v_i, v_j)$ is adjacent, clearly $V'$ is a clique of $G^{(k)}$. Since each element $v_i$ in the $k$-tuple $(v_1, v_2, \dots, v_k)$ comes from $C$, the size of $V'$ is $|C|^k$. Therefore, the size of the maximum clique of $G^{(k)}$ is at least $|C|^k$. We will prove by induction that this is indeed the size of the maximum clique.
+
+      In the base case, when $k = 1$, $G^{(1)} = G$, we have $|C^{(1)}| = |C|^1$. Now suppose that $|C^{(k)}| = |C|^k$ is true for $1 \leq i \leq k$. Let $C^{(k+1)} = \{(p_i, v_1, v_2, \dots, v_k)\}$ where $p_i$ is some vertex in $G$.
+
+      Since the adjacency condition of $(v_1, v_2, \dots, v_k)$ and $(w_1, w_2, \dots, w_k)$ only requires the adjacency of $v_i$ and $w_i$, the choice of vertices at index $i$ is independent of vertices at any other index. Hence, if we remove the prefix vertex $p_i$ from every tuple in $C^{(k+1)}$, the remaining $k$-tuples must form a maximum clique of $G^{(k)}$, otherwise we can always do better. By induction hypothesis, it has size $|C|^k$.
+
+      In order to make $C^{(k+1)}$ a clique of $G^{(k+1)}$, we must choose a set of prefixes $\{p_i\} \subseteq V$ such that every pair of vertices $(p_i, p_j)$ is connected by an edge. Moreover, to make it a maximum clique, we also want to maximize the number of prefixes we choose. In other words, we are trying to find a maximum set of mutually adjacent vertices from $G$ and prepend them to every $k$-tuple in $C^{(k)}$, so we should choose the set of prefix vertices $\{p_i\} = C$. Therefore, the size of $C^{(k+1)}$ is $|C|^k \times |C| = |C|^{k+1}$.
+
+      \item Given a $c$-approximation algorithm for finding the maximum clique, we can apply it on $G^{(k)}$ and obtain a clique of size $n$, while the true maximum clique of $G^{(k)}$ has size $|C|^k$.
+
+      By definition of an approximation ratio, $|C|^k/n \leq c$, so we have $|C|/n^{1/k} \leq c^{1/k}$. For any $\varepsilon > 0$, we can choose a positive integer $k > \log_{1+\varepsilon}{c}$, then $|C|/n \leq |C|/n^{1/k} \leq c^{1/k} < 1 + \varepsilon$. Since it is polynomial in the size of input, so we have a polynomial-time approximation scheme for finding the maximum clique.
+    \end{enumerate}
+
+  \section{Linear Inequality Feasibility}
+    Given a set of $m$ linear inequalities over $n$ variables, the linear inequality feasibility problem asks whether there exists a set of the instances that satisfies all the linear inequalities simultaneously.
+    \begin{enumerate}[leftmargin=*]
+      \item Prove that we can use an algorithm for linear programming to solve linear inequality feasibility problems. The number of variables and constraints used in the linear programming problem must be polynomial in $n$ and $m$.
+      \item Prove that we can use an algorithm for the linear inequality feasibility problem to solve linear programming problems. The number of variables and linear inequalities must be polynomial in the number of variables and constraints of the linear program.
+    \end{enumerate}
+
+    \solution
+    \begin{enumerate}[leftmargin=*, topsep=0pt]
+      \item Given a set of linear inequalities, we can simply formulate the equality feasibility problem as a linear program. First, we can set the objective function to be a constant such as 0 because there's nothing to maximize or minimize in this case. Next, we need to transform those linear inequalities into their slack form, and then apply the simplex algorithm. If the linear program returns a feasible solution, it implies that all the linear inequalities can be satisfied at the same time. Otherwise, those linear inequalities are not feasible. The variables and constraints in the linear program are exactly the same as in the equality feasibility problem so they are polynomial in $n$ and $m$.
+
+      \item Given a linear program in standard form, we want to maximize the objective function $\Sigma_{j=1}^{n} c_jx_j$ with $n$ variables, subject to $m$ constraints $\Sigma_{j=1}^{n} a_{ij}x_j \leq b_i, 1 \leq i \leq m$. Suppose we have an algorithm for the linear inequality feasibility problem, then we can apply it on the $m$ constraints of the linear program. If the algorithm fails to find a solution for the linear inequality feasibility problem, it means that those inequalities can not be satisfied, so the linear program should return infeasible. If the algorithm does find an assignment of the $n$ variables that satisfies all the linear inequalities, then the linear program is also feasible.
+
+      In order to solve the linear program and maximize the objective function, in each step we first calculate the value of our objective function using the assignment values returned by that algorithm, then we update the linear program by introducing a new constraint. For example, if the algorithm finds an assignment $\overline{x}$ which gives an objective function value of $\Sigma_{j=1}^{n} c_jx_j = k$, we will add another constraint $\Sigma_{j=1}^{n} c_jx_j > k$ to the original linear program. As long as this updated linear program is feasible, it must be equivalent to the original linear program because both the objective function and all other constraints are not affected. If we iteratively run this step, we are getting closer to the optimal solution. We will repeat this step until the algorithm detects that the updated constraints are not feasible anymore, in which case we stop and return the last calculated objective function value as the optimal solution.
+
+      Whenever the algorithm returns a feasible assignment so that all constraints are satisfied, it represents a point that's somewhere in the simplex. The basic idea is to update that point until it reaches a local maximum, which is also a global maximum because the simplex is convex. Since we are only adding 1 more constraint in each step, we can optimistically assume that the number of linear inequalities is polynomial in the number of constraints. If that's not true, we can modify the constraint to be $\Sigma_{j=1}^{n} c_jx_j > k + \alpha$, where $\alpha$ is a reasonable step size to choose in different trials. Unless the original linear program has an unbounded solution, we will eventually converge to an optimal solution.
+    \end{enumerate}
+
+  \section{Ghostbusters and Ghosts}
+    A group of $n$ ghostbusters is battling $n$ ghosts. Each buster carries a proton pack, which shoots a stream at a ghost, eradicating it. A stream goes in a straight line and terminates when it hits the ghost. The ghostbusters decide upon the following strategy: They will pair off with the ghosts, forming $n$ ghostbuster-ghost pairs, and then simultaneously each ghostbuster will shoot a stream at his chosen ghost. As we all know, it is \textit{very} dangerous to let streams cross, and so the busters must choose pairings for which no streams will cross. Assume that the position of each buster and each ghost is a fixed point in the plane and that no three positions are colinear.
+    \begin{enumerate}[leftmargin=*]
+      \item Argue that there exists a line passing through one Ghostbuster and one ghost such that the number of Ghostbusters on one side of the line equals the number of ghosts on the same side. Describe how to find such a line in $O(n \log n)$ time.
+      \item Give an $O(n^2 \log n)$-time algorithm to pair Ghostbusters with ghosts such that no streams cross.
+    \end{enumerate}
+
+    \solution
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}
+        \draw[black, dotted, thick]
+        (-0.5,0) -- (5.5,0)
+        (0,-0.5) -- (0,3.5);
+        \draw[->](0,0) -- (5,1);
+        \draw[->](0,0) -- (4,2);
+        \draw[->](0,0) -- (5,2);
+        \draw[->](0,0) -- (3,3);
+        \draw[->](0,0) -- (3,2);
+        \draw[->](0,0) -- (1,2);
+        \draw[color=black] (-0.25,-0.25) node {$P_0$};
+        \draw (5,1) node;
+        \draw (4,2) node;
+        \draw (5,2) node;
+        \draw (3,3) node;
+        \draw (3,2) node;
+        \draw (1,2) node;
+        \draw [fill=black] (5,1) circle (1.0pt);
+        \draw [fill=black] (4,2) circle (1.0pt);
+        \draw [fill=black] (5,2) circle (1.0pt);
+        \draw [fill=black] (3,3) circle (1.0pt);
+        \draw [fill=black] (3,2) circle (1.0pt);
+        \draw [fill=black] (1,2) circle (1.0pt);
+        \draw [fill=ffqqqq] (0,0) circle (1.5pt);
+      \end{tikzpicture}
+      \caption{Graham Scan}
+    \end{figure}
+
+    \begin{enumerate}[leftmargin=*, topsep=0pt]
+      \item First we pick the leftmost bottom point $P_0$ as the origin. For the remaining points, we can easily sort them by polar angle in counterclockwise order. Concretely, the cross product $(P_1 - P_0) \times (P_2 - P_0)$ gives us a comparison relationship between any two points $P_1$ and $P_2$, which can be applied to any comparison-based sorting algorithm such as merge sort.
+
+      Given the sorted points by polar angle with respect to $P_0$, we then visit them one by one in this order, and count the number of ghostbusters and ghosts along the way. We would stop at a point $P_k$ when the following two conditions are met:
+
+      \begin{itemize}[leftmargin=*, topsep=0pt]
+          \item Either $P_0$ is a ghostbuster and $P_k$ is a ghost, or $P_0$ is a ghost and $P_k$ is a ghostbuster.
+          \item The number of ghostbusters and ghosts visited so far are equal (including $P_0$ and $P_k$).
+      \end{itemize}
+
+      It follows that the line passing through $P_0$ and $P_k$ is the solution. Since the number of ghostbusters and ghosts are equal, we are guaranteed to find such a line. It takes $O(n\log n)$ to sort and $O(n)$ to scan, so the running time is $O(n\log n)$ in total.
+
+      \item Now we have paired one ghostbuster with one ghost in $O(n\log n)$ time, applying this algorithm recursively on both sides of this line will pair all the ghostbusters with ghosts.
+
+      That is, for the subset of points on each side, we choose the origin with the minimum coordinate, sort the remaining points on this side and then scan through them until we find a new line. During each recursion step, work done on one side of the line is independent from the other, so that no lines will ever cross. We need to find $n$ lines, so this divide-and-conquer approach runs in $O(n^2\log n)$ time.
+    \end{enumerate}
+
+  \section{Divide and Conquer Prefix Computations}
+    We use again divide and conquer method to perform prefix computation (with $\circ$ as binary operator) on a sequence $S$ of size $n$. This time the running time will be $O(\log \log n)$ time using $O(n/\log \log n)$ processors. This algorithm would be optimal, faster than the one mentioned in the book, but also using more processors. To obtain such an algorithm we proceed as follows:
+
+    \begin{enumerate}[leftmargin=*]
+      \item[a] Divide the sequence $S$ into $n^{1/2}$ subsequences of size $n^{1/2}$ each. Perform prefix computation on each sequence recursively using $n^{1/2}$ processors. Let the result of the computation on the $i$-th sequence be $s(i,1), s(i,2), \dots, s(i,n^{1/2})$.
+      \item[b] Perform a prefix computation on the sequence $s(1,n^{1/2}), s(2,n^{1/2}), \dots, s(n^{1/2}-1,n^{1/2})$ using $n$ processors. Let the result of this computation be $s^\prime(1,n^{1/2}), s^\prime(2,n^{1/2}), \dots, s^\prime(n^{1/2}-1,n^{1/2})$.
+      \item[c] For all $1 \leq i < n^{1/2}$ use the binary operator $\circ$ to combine $s^\prime(i,n^{1/2})$ with all the elements of $s(i+1,1),s(i+1,2),\dots,s(i+1,n^{1/2})$ using $n^{1/2}$ processors per subsequence.
+    \end{enumerate}
+
+    \begin{enumerate}[leftmargin=*]
+      \item Show that the algorithm described above uses $n$ processors to run in $O(\log \log n)$ time.
+      \item \label{l} Show how the number of processors can be reduced to $O(n/\log \log n)$ while maintaining the $O(\log \log n)$ running time, thus achieving the optimal cost $O(n)$.
+      \item Discuss the implications of the result obtained in Question \ref{l} on related computations such as array packing.
+    \end{enumerate}
+
+    \solution
+    \begin{enumerate}[leftmargin=*, topsep=0pt]
+      \item In step 1 we recursively perform prefix computation on each subsequence of size $n^{1/2}$ using $n^{1/2}$ processors. Suppose our recursive algorithm on the entire sequence $S$ has running time $t(n)$, then the recursion call on each subsequence takes $t(n^{1/2})$. Since this is done in parallel, this step takes $t(n^{1/2})$.
+
+      In step 2, the sequence $s(1,n^{1/2}), s(2,n^{1/2}), \dots, s(n^{1/2}-1,n^{1/2})$ contains every last element of a subsequence except the first one, so there are only $n^{1/2}-1$ elements, but we have $n$ processors available. We can take advantage of all of them by letting $n^{1/2}$ processors work on each element simultaneously, that is, for some element $s(i,n^{1/2})$, we use $n^{1/2}$ processors in parallel to perform binary operations on $s(i,n^{1/2})$ with all other elements $s(j,n^{1/2})$, where $j \neq i, 1 \leq j \leq n^{1/2}-1$. Since we have $n$ processors so that all elements can update in parallel, this step takes $O(1)$. However, this does not work for all binary operations, in fact, the binary operation must be both associative and commutative, such as addition, multiplication and union, but not concatenation because concurrent writes would mess up the order. Besides, this speed up is possible only with the Combining CRCW PRAM model such that concurrent reads and writes can be effectively reconciled.
+
+      In step 3, for each subsequence we use $n^{1/2}$ processors to combine its elements with the last element in the preceding subsequence. Each element can be mapped to a processor, so this single operation is done in parallel, this step takes $O(1)$ time.
+
+      Now combining these results we have $t(n) = t(n^{1/2}) + O(1)$. To derive the running time from this equation, we substitute $n$ with $e^m$, so $t(e^m) = t(e^{m/2}) + O(1)$. Let $s(m) = t(e^m)$, then $s(m) = s(m/2) + O(1)$. According to the Master's Theorem, this implies that
+      \begin{equation*}
+        s(m) = O(\log m) \hspace{3mm} \Rightarrow \hspace{3mm} t(n) = t(e^m) = s(m) = O(\log m) = O(\log \log n)
+      \end{equation*}
+
+      \item If we want to reduce the number of processors to $O(n/\log \log n)$, the previous partition will not work, we need a new partition. Besides, we want to follow the previous three steps, but need to make some modifications.
+
+      In concrete, we will divide $S$ into $n/\log \log n$ subsequences or groups, each group has size $\log \log n$. Since the number of groups is equal to the number of processors, each group can only have one processor, so in step 1, prefix computation must be executed sequentially within each group, while all groups do this in parallel. Hence, this step takes $O(\log \log n)$.
+
+      In step 2, the sequence will be $s(1,\log \log n), s(2,\log \log n), \dots, s(n/\log \log n-1,\log \log n)$ because we only have $n/\log \log n$ groups, processors and last elements. To perform prefix computation on this sequence, we will adopt the algorithm in Question 1. As we have shown in Question 1, that algorithm runs in $O(\log \log n)$ time on $n$ elements using $n$ processors, so here with $n/\log \log n$ elements and processors, it will take $O(\log \log(n/\log \log n))$ time to run. By removing the trivial terms, we have
+      \begin{equation*}
+        O(\log \log(n/\log \log n)) = O(\log(\log n-\log(\log \log n))) = O(\log \log n)
+      \end{equation*}
+
+      In step 3, for the same reason as in step 1, the combining operation has to be executed sequentially for each group due to the lack of processors. As a result, each group takes $O(\log \log n)$ to run, while different groups run in parallel with each other. This step takes $O(\log \log n)$.
+
+      In summation, the total running time is $3 \times O(\log \log n) = O(\log \log n)$ which is identical to the previous one, but the cost is optimal as we are now using less than $n$ processors.
+
+      \item The result obtained in Question 2 has several implications.
+
+      We have seen that it is possible to devise an optimal parallel algorithm that takes a suboptimal algorithm as an intermediate step. The divide and conquer approach allows us to divide a problem into many subproblems which can be solved in parallel, and the way we partition the data can sometimes make a difference. In addition, different PRAM models may lead to different optimal algorithms to solve the same problem, we are free to choose among them depending on the scenario. This gives us a lot more flexibility from a practical perspective since the number of processors and hardware is often fixed in real world. For example, compared to the other optimal algorithm discussed in the class notes, this one is also optimal but much faster, so it can be very useful if we are strict on the running time and have sufficient processors that support CRCW PRAM models. It has also proved the possibility of applications being highly scalable based on commutative binary operations such as prefix sum. For example, the array packing problem uses addition as the underlying binary operation, so that as long as the hardware requirement is satisfied, it can easily scale up to boost performance, especially when the input array size is huge.
+    \end{enumerate}
+
+  \section{Descending in a Hypercube}
+    Let $N = 2^g$ data be stored in the processors of a hypercube, one value per processor (so that the value $x_i$ is stored in $P_i$, $0 \leq i < N$). A technique with wide applicability to hypercube algorithms is called \textsc{Descend} and consists of $g$ iterations. During the $j$-th iteration a basic binary operation \textsc{Operation}$(P_i, P_l)$ is performed on data in cores whose indices differ by $2^j$. Here is the pseudocode for this process, with $i_{g-1}i_{g-2}\dots i_{1}i_{0}$ the binary representation of index $i$:
+
+    \newpage
+
+    \begin{algorithm}
+      % \renewcommand\thealgorithm{}  % suppress the caption number
+      \caption{\textsc{Descend}}
+      \label{ad}
+      \begin{algorithmic}[1]
+        \For{$j \leftarrow g - 1$ \textbf{to} $0$} \Comment{iterate over each bit}
+          \For{$i \leftarrow 0$ \textbf{to} $2^{g}-1$} \Comment{iterate over each core}
+            \If{$i_j = 0$}  \textsc{Operation}$(P_i, P_{i+2^j})$
+              \hspace{2mm}\raisebox{.5\baselineskip}[0pt][0pt]{$\left.\rule{0pt}{1.0\baselineskip}\right\}\ \mbox{in parallel}$} \Comment{operate on adjacent cores}
+      \end{algorithmic}
+    \end{algorithm}
+
+    \noindent If \textsc{Operation} requires constant time then \textsc{Descend} runs in $O(\log N)$ time. The dual to \textsc{Descend} is \textsc{Ascend}, in which $j$ in the outer loop varies from $0$ to $g-1$.
+
+    \begin{enumerate}[leftmargin=*]
+      \item Show how \textsc{Descend} can be used to obtain an algorithm that computes the sum of all the values $x_i$ and places the result in $P_0$.
+      \item Use either \textsc{Ascend} or \textsc{Descend} to broadcast the datum held by some processor $P_k$ to all the other processors.
+      \item Suggest other problems that can be solved using these paradigms.
+    \end{enumerate}
+
+    \solution\\
+    If two integers differ by $2^k$, then in their binary representation, all bits must be the same except the $k$-th bit where they differ by 1. That is, in the $j$-th iteration of the \textsc{Descend} algorithm, the binary operation is applied on any pair of processors whose indices differ only at the $j$-th bit. A bit can be either 0 or 1, only 2 possible values. Therefore, in each iteration, all processors are divided into halves by some bit, one half will exchange data with the other half via the binary operation. After $g$ iterations, we would have divided the set of processors bit by bit in every possible way, so that every processor has talked to all the other processors exactly once, either directly or indirectly.
+
+    \begin{enumerate}[leftmargin=*]
+      \item[1.] Since the addition operation is commutative, it doesn't matter if we loop from the highest bit or the lowest bit, so we don't mind whether the \textsc{Descend} or \textsc{Ascend} algorithm is being used. In order to place the final result in $P_0$ whose index is a bunch of zeros in binary format, during the $j$-th step we must store the sum of $P_i$ and $P_{i+2^j}$ into $P_i$ because $i_j=0$. Then after $g$ iterations, the value in each processor will be added exactly once to $P_0$. So we define
+      \begin{enumerate}
+          \item[] \textsc{Operation}($P_i$, $P_{i+2^j}$) to be \fbox{$P_i$ = $P_i$ + $P_{i+2^j}$}
+      \end{enumerate}
+      As an example, we can graphically illustrate how it works in a 3 dimensional hypercube. In the figure below, processors $P_0,P_1,\dots,P_7$ correspond to the 8 corner vertices of the cube, which are represented in their binary format as $(0,0,0),(0,0,1),\dots,(1,1,1)$. For simplicity, suppose that initially each processor has value $x_i=1$, so we expect $P_0$ to be 8 in the end.
+
+      In the first iteration the algorithm looks at the highest bit, which is 0 for vertices on the left side and 1 for vertices on the right side. So as to perform the binary operation, values on the right side are added to those on the left. Vertices whose values have been updated are colored blue. Likewise, the second round looks at the middle bit, so values on the upper side are added to those on the lower side, and so forth. When the algorithm finishes, $P_0(0,0,0)$ has been involved in all iterations and colored blue for three times, hence it has the sum of all values and we color it red. In the end, we managed to compute the sum of 8 numbers in merely 3 steps.
+    \end{enumerate}
+
+    % tex code generated by GeoGebra
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+      \clip(-1,-8.5) rectangle (16,6.6);
+      \draw [line width=0.4pt] (3.5,-7.5)-- (5.5,-5.5);
+      \draw [line width=0.4pt] (7.5,-7.5)-- (9.5,-5.5);
+      \draw [line width=0.4pt] (3.5,-3.5)-- (5.5,-1.5);
+      \draw [line width=0.4pt] (7.5,-3.5)-- (9.5,-1.5);
+      \draw [line width=0.4pt] (0,0)-- (2,2);
+      \draw [line width=0.4pt] (4,0)-- (6,2);
+      \draw [line width=0.4pt] (0,4)-- (2,6);
+      \draw [line width=0.4pt] (4,4)-- (6,6);
+      \draw [line width=0.4pt] (8,0)-- (10,2);
+      \draw [line width=0.4pt] (12,0)-- (14,2);
+      \draw [line width=0.4pt] (8,4)-- (10,6);
+      \draw [line width=0.4pt] (12,4)-- (14,6);
+      \draw (0.7150220913107512,-0.25439503619441556) node[anchor=north west] {(a) right to left};
+      \draw (8.676730486008838,-0.216132368148914) node[anchor=north west] {(b) top to bottom};
+      \draw (4.332842415316643,-7.715615305067217) node[anchor=north west] {(c) back to front};
+      \draw [line width=0.4pt] (0,4)-- (4,4);
+      \draw [line width=0.4pt] (2,6)-- (6,6);
+      \draw [line width=0.4pt] (0,0)-- (4,0);
+      \draw [line width=0.4pt] (2,2)-- (6,2);
+      \draw [line width=0.4pt] (0,4)-- (0,0);
+      \draw [line width=0.4pt] (2,2)-- (2,6);
+      \draw [line width=0.4pt] (6,2)-- (6,6);
+      \draw [line width=0.4pt] (4,4)-- (4,0);
+      \draw [line width=0.4pt] (14,6)-- (14,2);
+      \draw [line width=0.4pt] (8,4)-- (12,4);
+      \draw [line width=0.4pt] (10,6)-- (14,6);
+      \draw [line width=0.4pt] (8,0)-- (12,0);
+      \draw [line width=0.4pt] (10,2)-- (14,2);
+      \draw [line width=0.4pt] (8,4)-- (8,0);
+      \draw [line width=0.4pt] (12,0)-- (12,4);
+      \draw [line width=0.4pt] (10,6)-- (10,2);
+      \draw [line width=0.4pt] (5.5,-1.5)-- (9.5,-1.5);
+      \draw [line width=0.4pt] (3.5,-3.5)-- (7.5,-3.5);
+      \draw [line width=0.4pt] (9.5,-5.5)-- (9.5,-1.5);
+      \draw [line width=0.4pt] (7.5,-7.5)-- (3.5,-7.5);
+      \draw [line width=0.4pt] (5.5,-5.5)-- (5.5,-1.5);
+      \draw [line width=0.4pt] (3.5,-3.5)-- (3.5,-7.5);
+      \draw [line width=0.4pt] (9.5,-5.5)-- (5.5,-5.5);
+      \draw [line width=0.4pt] (7.5,-3.5)-- (7.5,-7.5);
+      \draw [->,line width=0.4pt,dash pattern=on 1pt off 1pt] (3.5,2.9) -- (0.5,2.9);
+      \draw [->,line width=0.4pt,dash pattern=on 1pt off 1pt] (9.622754360465116,3.5725472383720938) -- (9.622754360465116,0.5725472383720931);
+      \draw [->,line width=0.4pt,dash pattern=on 1pt off 1pt] (7,-3) -- (5,-5);
+      \begin{scriptsize}
+      \draw [fill=ffqqqq] (3.5,-7.5) circle (2.5pt);
+      \draw[color=ffqqqq] (4.59499263622975,-7.193846949327817) node {(0,0,0) = 8};
+      \draw [fill=qqqqff] (7.5,-7.5) circle (2.5pt);
+      \draw[color=qqqqff] (8.100883652430046+0.5,-7.093846949327817-0.1) node {(1,0,0) = 4};
+      \draw [fill=qqqqff] (7.5,-3.5) circle (2.5pt);
+      \draw[color=qqqqff] (8.100883652430046+0.5,-3.0953981385729055-0.1) node {(1,1,0) = 2};
+      \draw [fill=qqqqff] (3.5,-3.5) circle (2.5pt);
+      \draw[color=qqqqff] (4.09499263622975+0.5,-3.0953981385729055-0.1) node {(0,1,0) = 4};
+      \draw [fill=black] (5.5,-5.5) circle (2.5pt);
+      \draw[color=black] (6.0979381443298974+0.2,-5.085056876938985-0.1) node {(0,0,1) = 4};
+      \draw [fill=black] (9.5,-5.5) circle (2.5pt);
+      \draw[color=black] (10.103829160530191+0.2,-5.085056876938985-0.1) node {(1,0,1) = 2};
+      \draw [fill=black] (9.5,-1.5) circle (2.5pt);
+      \draw[color=black] (10.103829160530191+0.2,-1.0866080661840742-0.1) node {(1,1,1) = 1};
+      \draw [fill=black] (5.5,-1.5) circle (2.5pt);
+      \draw[color=black] (6.0979381443298974+0.2,-1.0866080661840742-0.1) node {(0,1,1) = 2};
+      \draw [fill=qqqqff] (0,0) circle (2.5pt);
+      \draw[color=qqqqff] (1.1023564064801179,0.30563598759048614) node {(0,0,0) = 2};
+      \draw [fill=black] (4,0) circle (2.5pt);
+      \draw[color=black] (4.595729013254787+0.5,0.40563598759048614-0.1) node {(1,0,0) = 1};
+      \draw [fill=black] (4,4) circle (2.5pt);
+      \draw[color=black] (4.595729013254787+0.5,4.404084798345398-0.1) node {(1,1,0) = 1};
+      \draw [fill=qqqqff] (0,4) circle (2.5pt);
+      \draw[color=qqqqff] (0.6023564064801179+0.5,4.404084798345398-0.1) node {(0,1,0) = 2};
+      \draw [fill=qqqqff] (2,2) circle (2.5pt);
+      \draw[color=qqqqff] (2.6053019145802656+0.2,2.4144260599793173-0.1) node {(0,0,1) = 2};
+      \draw [fill=black] (6,2) circle (2.5pt);
+      \draw[color=black] (6.598674521354934+0.2,2.4144260599793173-0.1) node {(1,0,1) = 1};
+      \draw [fill=black] (6,6) circle (2.5pt);
+      \draw[color=black] (6.598674521354934+0.2,6.412874870734228-0.1) node {(1,1,1) = 1};
+      \draw [fill=qqqqff] (2,6) circle (2.5pt);
+      \draw[color=qqqqff] (2.6053019145802656+0.2,6.412874870734228-0.1) node {(0,1,1) = 2};
+      \draw [fill=qqqqff] (8,0) circle (2.5pt);
+      \draw[color=qqqqff] (9.10162002945508,0.30563598759048614) node {(0,0,0) = 4};
+      \draw [fill=qqqqff] (12,0) circle (2.5pt);
+      \draw[color=qqqqff] (12.59499263622975+0.5,0.40563598759048614-0.1) node {(1,0,0) = 2};
+      \draw [fill=black] (12,4) circle (2.5pt);
+      \draw[color=black] (12.59499263622975+0.5,4.404084798345398-0.1) node {(1,1,0) = 1};
+      \draw [fill=black] (8,4) circle (2.5pt);
+      \draw[color=black] (8.60162002945508+0.5,4.404084798345398-0.1) node {(0,1,0) = 2};
+      \draw [fill=qqqqff] (10,2) circle (2.5pt);
+      \draw[color=qqqqff] (10.604565537555228+0.2,2.4144260599793173-0.1) node {(0,0,1) = 4};
+      \draw [fill=qqqqff] (14,2) circle (2.5pt);
+      \draw[color=qqqqff] (14.597938144329897+0.2,2.4144260599793173-0.1) node {(1,0,1) = 2};
+      \draw [fill=black] (14,6) circle (2.5pt);
+      \draw[color=black] (14.597938144329897+0.2,6.412874870734228-0.1) node {(1,1,1) = 1};
+      \draw [fill=black] (10,6) circle (2.5pt);
+      \draw[color=black] (10.604565537555228+0.2,6.412874870734228-0.1) node {(0,1,1) = 2};
+      \end{scriptsize}
+      \end{tikzpicture}
+      \vspace{-9mm}
+      \caption{Parallel sum in a 3-hypercube}
+    \end{figure}
+
+    \begin{enumerate}[leftmargin=*]
+      \item[2.] No matter which bit we start from, the \textsc{Descend} or \textsc{Ascend} algorithm always divides the processors by a different dimension in each round, then the binary operation is performed on pairs of processors, one from each group. Suppose that we use the \textsc{Ascend} algorithm that loops from the $0$-th bit, further assume that $P_k$ has the datum set $\{x\}$ while other processors have no data ($\emptyset$) initially. In order to broadcast, we can simply define
+      \begin{enumerate}
+          \item[] \textsc{Operation}($P_i$, $P_{i+2^j}$) to be \fbox{$P_i \bigcup P_{i+2^j}$}
+      \end{enumerate}
+
+      In the first round, $P_k$ sends $\{x\}$ to its counterpart $\bar{P_{k}}$ in the other group via the binary operation, this implies that $P_k$ and $\bar{P_{k}}$ can only differ by 1 at the $0$-th bit. On the other hand, the rest of the processors are empty, so the binary operation has no effect on them. When this round finishes, now 2 processors know about $\{x\}$. In the second round, we have a new partition of processors. Since $P_k$ and $\bar{P_{k}}$ differs only at the $0$-th bit but now we have divided the processors by another bit, they cannot be counterparts this time or in any future rounds. Hence, they will both have a new counterpart who can receive the datum $\{x\}$. When this round finishes, now 4 processors know about $\{x\}$, and so forth...
+
+      Given that any two processors can be counterparts in only one round, we will always have new pairs of counterparts in each round. As a result, after the $j$-th iteration, $2^j$ processors will know about $\{x\}$, and finally the datum will be propagated across the entire interconnection network.
+
+      \item[3.] The \textsc{Descend} and \textsc{Ascend} paradigm can be a powerful tool in many scenarios.
+
+      If the binary operation is set intersection and each processor has a set, we can find the common values and remove duplicates. If the binary operation is set union, we can also find all distinct values or aggregate the data. For other binary operations such as the max()/min() function or multiplication, we can compute the maximum, minimum and product of numbers in an array or other data structures. It is also possible to use logical gates in parallel, where each processor handles a condition that is either true or false. For instance, we can check if the constraints of a linear program are violated, or if an interpretation of the 3-SAT formula is satisfiable.
+    \end{enumerate}
+
+  \vspace{8mm}
+  \printbibliography
+
+  \vfill
+  \doclicenseThis
+
+\end{document}
