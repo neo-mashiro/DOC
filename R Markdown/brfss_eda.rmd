@@ -1,0 +1,186 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+```{r load-data}
+load("brfss2013.RData")
+```
+* * *
+
+## Part 1: Data
+
+About random sampling:
+
+1. In landline telephone survey, interviewers collect data from a randomly selected adult in a household.
+Since an adult is randomly selected from the household, the subject is representative of all adults in
+that household, and any conclusion drawn based on that subject can be generalized to that specific household
+as well. However, the documentation does not mention about how the "household" has been selected, maybe
+it's not at random. Since the survey is not mandatory, the sample households are only those who are willing
+to cooperate with the interviewers, so the sample must be somewhat biased, and the conclusion cannot
+generalize well to the whole population.
+
+2. In the cellular telephone version survey, interviewers collect data from an adult who participates
+by using a cellular telephone and resides in a private residence or college housing.
+Again, this is not random sampling at large, any conclusion can only be generalized to the participants
+who resides in a private residence or college housing.
+
+About random assignment:
+
+1. Overall, the dataset comes from a broad survey that spans over states for more than 30 years.
+There's no experiments being conducted, no control groups, but it's just a survey that collects data
+from households based on some questionnaires.
+
+2. In order to make conclusions about a causal relationship, we need to control the potential confounders
+and focus on the explanatory variables and response variables specific to our problems.
+Since there are more than 300 variables, the data varies greatly in diversity, and it's really hard
+if we want to choose a subset of the data and keep other variables unchanged. Some rigorous data cleaning
+task must be performed before we can analyse it in a meaningful manner.
+Therefore, any conclusions should refer to only correlation between variables rather than causal relationship.
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:**
+
+Smoking is usually said to be the most detrimental to peoples' health.
+How many males and females are everyday regular smokers?
+Do regular smokers in general have worse health status?
+
+**Research quesion 2:**
+
+In general, most pregnant women cares a lot about their health status more than others.
+They tend to exercise everyday, eat healthy food, get enough sleep in order for
+their babies to be healthy. I wonder if this is true.
+Are pregnant women in general more healthy than others?
+How likely are they going to drink alcohols?
+
+**Research quesion 3:**
+
+Is there a difference in incomes between males and females if they
+have the same education level?
+What does the distribution looks like?
+For simplicity, I'm going to analyse this question on a subset of
+the data where both males and females are college graduates.
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+**Research quesion 1:**
+
+Smoking is usually said to be the most detrimental to peoples' health.
+How many males and females are everyday regular smokers?
+Do regular smokers in general have worse health status?
+
+As per the document, "smokday2" variable refers to the smoking frequency.
+First, the filter function select all regular smokers data, and then
+pass it to ggplot() that draws a barplot with "sex" on the horizontal axis.
+```{r}
+brfss2013 %>% 
+  filter(smokday2 == "Every day") %>%
+  ggplot(aes(x = sex)) + geom_bar()
+```
+
+The graph indicates that there are around 25,000 male regular smokers among the participants,
+and slightly over 30,000 female regular smokers.
+
+To see if regular smokers are healthy or not, draw a barplot with "genhlth" - general health status
+on the x-axis.
+```{r}
+brfss2013 %>% 
+  filter(smokday2 == "Every day") %>%
+  ggplot(aes(x = genhlth)) + geom_bar()
+
+```
+
+As we can see, only a small part of regular smokers are suffering from poor health conditions.
+It looks like regular smokers are not necessarily unhealthy in general, but we cannot say
+anything other than this. To decide if smoking makes one unhealthy, other factors such as
+how long one has smoked and the subject's age should also be in consideration.
+
+**Research quesion 2:**
+
+In general, most pregnant women cares a lot about their health status more than others.
+They tend to exercise everyday, eat healthy food, get enough sleep in order for
+their babies to be healthy. I wonder if this is true.
+Are pregnant women in general more healthy than others?
+How likely are they going to drink alcohols?
+
+Using the fill argument within the ggplot() function, we can draw a barplot showing the
+distribution of general health status, with pregnant data inside the bar.
+```{r}
+brfss2013 %>% 
+  ggplot(aes(x = genhlth, fill = pregnant)) + geom_bar()
+```
+
+Even if pregnant participants are rare in the sample, we can still see that almost all of
+them are in relatively good shape.
+
+```{r}
+brfss2013 %>% 
+  filter(pregnant == "Yes") %>%
+  ggplot(aes(x = genhlth)) + geom_bar()
+```
+
+To further confirm the point, now this graph clearly suggests that pregnant women who are
+in bad fair or poor health status are very rare, and they are in fact more healthy than
+the whole population.
+
+To see how much alcohol pregnant women tend to drink, the summarise function create a new
+variable called "avg_alcohol", which is calculated as the median of "alcday5".
+"alcday5" refers to the coded frequency of drinking alcohols, because we don't have any
+numerical data here, we use median() rather than mean().
+Then the arrange(desc()) outputs "avg_alcohol" grouped by "pregnant".
+```{r}
+brfss2013 %>% 
+  group_by(pregnant) %>%
+  summarise(avg_alcohol = median(alcday5, na.rm = TRUE)) %>%
+  arrange(desc(avg_alcohol))
+```
+
+As a result, the median indicates that most pregnant women do not drink at all.
+On the flip side, non-pregnant subjects have a median of "101", which means that
+non-pregnant people on average drink at least one alcohol per week.
+
+**Research quesion 3:**
+
+Is there a difference in incomes between males and females if they
+have the same education level?
+What does the distribution looks like?
+For simplicity, I'm going to analyse this question on a subset of
+the data where both males and females are college graduates.
+
+We first filter the data on only college graduates.
+Then create the barplot showing the income level on males and females.
+```{r}
+brfss2013 %>% 
+  filter(educa == "College 4 years or more (College graduate)") %>%
+  ggplot(aes(x = income2, fill = sex)) + geom_bar() +
+  theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 0.5, vjust = 0.5))
+```
+
+Since we don't have numerical data for income, we cannot compute the mean differences.
+The graph shows the counts of male and females given a income range.
+Note that the total number of males in employment is much higher than females,
+but the distribution of either gender looks similar, that is left skewed in our case.
+when the income is low, the proportion of female workers are roughly over 50%.
+But when income rank goes up, the proportion of female workers in that rank goes down.
+In other words, if a job position is very important and extremely well paid,
+then a male is more likely to be in that position than a female.

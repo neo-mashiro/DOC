@@ -1,0 +1,329 @@
+---
+title: "Modeling and prediction for movies"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+library(GGally)
+```
+
+### Load data
+
+```{r load-data}
+load("movies.Rdata")
+```
+
+* * *
+
+## Part 1: Data
+
+**generalizability:**  
+
+The `movies` dataset includes information from Rotten Tomatoes and IMDB for a random sample of movies.
+There are 651 observations in the data, so the sample size is not too small. It's reasonable to assume that
+such a random sample is representative of the movies population, so the conclusions based on this dataset
+can be generalized as well.
+
+**causality:**  
+
+The `movies` dataset includes only observational data, no experiment has been conducted.
+Therefore, we can only find association relationship between variables, but no causality can be inferred from the data.
+
+* * *
+
+## Part 2: Research question
+
+In context of this particular dataset, my boss is interested in learning what attributes make a movie popular.
+Therefore, I will stick to this question and try to find out the most significant attributes that make a movie popular.
+Besides, she is also interested in learning something new about movies.
+That said, if I could find a model that accurately predicts the movies popularity, I can recommend new movies to her.
+If she really loves the movies I recommend, maybe I can get a promotion :)
+
+Concretely, I'm trying to find an optimal parsimonius linear regression model using backward-elinimation method based on p-value.
+  
+For the response variable, I will use `imdb_num_votes` which stands for the number of votes on IMDB.
+IMDB is one of the largest movies database with millions of users, so the number of votes on IMDB is very indicative
+of a movie's popularity. In general, the higher the number of votes, the more popular a movie is. However, this is not always the case.
+Here I will just focus on the *popularity* rather than the *quality* of the movie.
+There are also some other variables related to "rating" such as `audience_score` and `critics_score`,
+but these variables might not be a good measure of popularity for two reasons:  
+
+1. The score of a movie measures the quality of movie and whether or not people who have watched the movie are satisfied with it.
+Some movies are bizarre in its style and do not meet the tastes of the majority, but they might be in fact of good quality so the audience
+who are interested in such a style tend to rate them high, while those who are not interested are not likely to watch it.
+This kind of movie can be a masterpiece with very few people knowing about it.  
+2. Some movies might be very popular among people who have not even watched it. Such cases are not rare where the studio has spent
+millions of dollars in advertising of the movie, or the main actors are extremely famous. Regardless how famous the actors and directors
+are, the story of the movie might not be as good. 
+
+For the explanatory variables, below is a list of candidates that I think are the most relevant:  
+
+variable           | description
+------------------ | -------------------------------------------------------------------------------
+`imdb_rating`      | Rating on IMDB
+`audience_score`   | Audience score on Rotten Tomatoes
+`critics_score`    | Critics score on Rotten Tomatoes
+`runtime`          | Runtime of movie (in minutes)
+`thtr_rel_year`    | Year the movie is released in theaters
+`best_dir_win`     | Whether or not the director of the movie ever won an Oscar (no, yes)
+`best_actor_win`   | Whether or not one of the main actors in the movie ever won an Oscar (no, yes)
+`best_actress_win` | Whether or not one of the main actresses in the movie ever won an Oscar (no, yes)
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+First, select the variables of interest and simply remove missing value.
+
+```{r}
+movies %>%
+  select(imdb_num_votes, imdb_rating, audience_score, critics_score, runtime,
+         thtr_rel_year, best_dir_win, best_actor_win, best_actress_win) %>%
+  filter(!is.na(imdb_num_votes) & !is.na(imdb_rating) & !is.na(audience_score) &
+         !is.na(critics_score) & !is.na(runtime) & !is.na(thtr_rel_year) &
+         !is.na(best_dir_win) & !is.na(best_actor_win) & !is.na(best_actress_win)
+        ) -> movies
+glimpse(movies)
+```
+
+Since the dataset does not have too many missing values, we lost only one observation after filtering.
+
+In consideration of collinearity, let's see the correlation between the numerical variables.
+
+```{r}
+numerical_vars = select(movies, imdb_rating, audience_score, critics_score, runtime, thtr_rel_year)
+cor(numerical_vars)
+```
+
+From the correlation matrix, we can see that the correlation coefficients between `imdb_rating`, `audience_score`
+and `critics_score` are very high (0.70 ~ 0.86), so they are highly associated with each other, which also means
+that they are suffering from multicollinearity.
+
+```{r}
+ggpairs(numerical_vars)
+```
+
+The `ggpairs()` function gives us a summary of various plots between these variables:  
+
+**Histograms:**  
+* `imdb_rating`, `audience_score`, and `critics_score` are left skewed, the medians are pretty high.
+  This means that people in general do not give very low ratings to a movie, they tend to rate positively.  
+* `runtime` is a little bit right skewed, the median is around 110~120 minutes, and movies longer than 3 hours are rare.  
+* `thtr_rel_year` is extremely left skewed, which means that the number of movies in the old times is much less than today.  
+    
+**Scatterplot:**  
+* There's a clear trend that `imdb_rating`, `audience_score`, and `critics_score` are positively related.  
+* It looks like ratings of movies have nothing to do with `runtime` and `thtr_rel_year`.
+  These scores are not biased toward longer and more recent movies, so to speak.  
+      
+**Correlations:**  
+* The coefficients between ratings are consistent with our findings above.  
+* The correlation between `runtime` and the ratings variables are from 0.17 to 0.26, so there could be a trend that
+  the scores of longer movies are higher, but the relationship is weak.  
+* The correlation between `thtr_rel_year` and the ratings variables are negative, so it looks like that old movies
+  are rated higher, but this relationship is even weaker because the correlation is close to zero.  
+      
+Next, let's turn to see the correlation between categorical variables `best_dir_win`, `best_actor_win` and `best_actress_win`.
+
+```{r warning = FALSE}
+movies %>%
+  select(imdb_rating, best_dir_win, best_actor_win, best_actress_win) %>%
+  ggpairs()
+```
+
+The `ggpairs()` function on categorical variables now gives us a set of different plots:  
+
+**Histograms:**  
+* There are much more "no" than "yes" in terms of `best_dir_win`, `best_actor_win` and `best_actress_win`,
+  so movies with very famous directors, actors or actresses are rare.  
+
+**Boxplot:**  
+* In general, the medians of movies with very famous directors, actors or actresses tend to be higher.  
+* Movies without a popular star have many outliers of very low ratings.    
+
+Now that we see `imdb_rating`, `audience_score` and `critics_score` are suffering from multicollinearity, 
+it's better to keep only one of them and remove the other two. Adding a second variable brings nothing new
+to the model since information included in them are overlapped, and we know that collinear variables can 
+result in biased estimates of the regression parameters.  
+
+However, we don't want to remove variables randomly. Even if they are correlated, information in these variables
+are not exactly the same. In order to include all information, I'm going to create a new variable which gives
+the average rating scores based on the 3 variables.
+
+```{r}
+movies %>%
+  select(imdb_rating, audience_score, critics_score) %>%
+  summary()
+```
+
+From the summary statistics, it's clear that the scores range from 0 to 100, while the
+rating is on a scale of 0~10. Before we take the average of them, first let's multiply the `imdb_rating` by 10
+so that all 3 variables are measured on the same scale.
+
+```{r}
+movies %>%
+  mutate(imdb_rating = 10 * imdb_rating) -> movies
+summary(movies$imdb_rating)
+```
+
+Next, we create the new variable `avg_score` as the explanatory variable.
+
+```{r}
+movies %>%
+  mutate(avg_score = (imdb_rating + audience_score + critics_score) / 3) -> movies
+```
+
+Furthermore, we noticed that the response variable `imdb_num_votes` has a much higher order of magnitude
+compared to other variables. Therefore, such a linear regression model will give us very large coefficients.
+As our last step, let's perform a log transformation on `imdb_num_votes`.
+
+```{r}
+movies %>%
+  mutate(imdb_num_votes = log(imdb_num_votes)) -> movies
+```
+
+* * *
+
+## Part 4: Modeling
+
+Now let's build up a full model using the list of explanatory variables candidates, and then apply the
+backward-elinimation methods based on p-value to find out our best model.
+
+```{r}
+m_full <- lm(imdb_num_votes ~ avg_score + runtime + thtr_rel_year + 
+                              best_dir_win + best_actor_win + best_actress_win,
+             data = movies)
+summary(m_full)
+```
+
+The F-test yielding a p-value close to zero means that our model is not meaningless, at least one of the
+coefficients is non-zero. Since my boss is most interested in finding the most significant attributes that
+makes a movie popular, I will drop variables based on the p-value rather than adjusted R-square.
+`best_actress_win` has the highest p-value of 0.259, so we remove it first and refit the model.
+
+```{r}
+m1 <- lm(imdb_num_votes ~ avg_score + runtime + thtr_rel_year + 
+                          best_dir_win + best_actor_win,
+         data = movies)
+summary(m1)
+```
+
+In order for the model to be more reliable, we assume the arbitrary significance level to be smaller, 
+that is 1% instead of 5%. This time, `best_actor_win` has a p-value of 0.047, so we remove it and refit again.
+
+```{r}
+m2 <- lm(imdb_num_votes ~ avg_score + runtime + thtr_rel_year + best_dir_win,
+         data = movies)
+summary(m2)
+```
+
+Now that all coefficients are statistically significant with a nearly zero p-value, we choose `m2` as our best model.
+
+Last but not least, let's work on the diagnostics of the model.
+
+**Linearity:**
+
+```{r}
+ggplot(data = m2, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+```
+
+It looks like the residuals are randomly scattered around 0.
+
+```{r}
+plot(m2$residuals ~ movies$avg_score)
+```
+
+A scatterplot between `m2$residuals` and `movies$avg_score` confirms the point, that the model residuals
+are randomly distributed around zero. The plot also shows that we have more observations with higher `avg_score`.
+
+**Nearly normal residuals:**
+
+```{r}
+ggplot(data = m2, aes(x = .resid)) +
+  geom_histogram(bins = 600) +
+  xlab("Residuals")
+```
+
+```{r}
+ggplot(data = m2, aes(sample = .resid)) +
+  stat_qq()
+```
+
+Both the histogram and normal probability plot suggest a nearly normal distribution of the residuals.
+
+**Constant variability:**
+
+```{r}
+plot(m2$residuals ~ m2$fitted)
+```
+
+We already see that the variance of residuals are roughly consistent across the sample.
+
+**Independent residuals:**
+
+```{r}
+plot(m2$residuals)
+```
+
+Finally, the residuals plot against observation indices shows that observations are independent,
+of course this is true because people don't rate a movie based on other movies.
+
+* * *
+
+## Part 5: Prediction
+
+In the prediction part, I will choose a very famous movie "La La Land" to test my model.
+Both the director and main actor and actress are nominated for the Oscar prize, and we can find
+related information on the IMDB website.
+
+```{r}
+la_la_land <- data.frame(avg_score = 81, runtime = 128, thtr_rel_year = 2016, best_dir_win = "yes")
+predict(m2, la_la_land, interval = "prediction", level = 0.95)
+```
+
+The `predict()` function gives us a 95% confidence interval of `(8.93, 15.01)`, remember that we have applied
+log transformation on the response variable, so now we need to convert it back.
+
+```{r}
+exp(predict(m2, la_la_land, interval = "prediction", level = 0.95))
+```
+
+Based on the result, we are 95% confident that the number of IMDB votes falls in the range of (7619, 3320124).
+It turns out, this range is too wide to be considered a good estimate.
+
+* * *
+
+## Part 6: Conclusion
+
+```{r}
+summary(m2)
+```
+
+The model predicts the number of votes of "La la land" to be 159,053, while the true value on IMDB is 352,092 votes.
+The problem here is that the adjusted R-square is less than 20%, so the model can only explain 20% of the 
+variability in the response variable.   
+However, with all the data we have, we still find that the average rating of the movie, the length, as well as the
+year it was released are closely related to the popularity. The most significant attribute in our model is `thtr_rel_year`.
+This means that the more recent a movie was released, the more popular it tends to be. On the flip side, while the
+average rating score also has a p-value of 0.01, it is less significant.  
+
+I believe, that popularity may not be a good measure of the movie's true value. Even if a movie is popular for now,
+one day it will finally disappear from audience's memories. After all, it's how popular a movie is among the current
+population, but the population is constantly changing over time. In the old times, not many people have a lot of chances
+to go to the theater and watch movies on a regular basis, but today we can all stay at home on weekends and enjoy movies
+at any time we like.
