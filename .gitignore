@@ -1,0 +1,15 @@
+# ignore all folders with this name anywhere in the repo
+# no slashes required, paths are only checked if you include "/"
+.ipynb_checkpoints
+__pycache__
+
+# do not ignore this file
+!.gitignore
+
+# files to ignore
+*.Rhistory
+*.gz
+*.nii.gz
+
+# folders to ignore
+
