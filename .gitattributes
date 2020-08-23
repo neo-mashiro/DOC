@@ -1,4 +1,4 @@
-docs/* linguist-documentation=false
+docs/* linguist-documentation=true
 
 # *.ipynb linguist-language=python
 *.ipynb linguist-detectable=false
