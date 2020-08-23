@@ -1,3 +1,5 @@
+docs/* linguist-documentation=false
+
 # *.ipynb linguist-language=python
 *.ipynb linguist-detectable=false
 *.sql linguist-detectable=true
