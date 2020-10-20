@@ -3,7 +3,7 @@ docs/* linguist-documentation=true
 # *.ipynb linguist-language=python
 *.ipynb linguist-detectable=false
 *.sql linguist-detectable=true
-*.rmd linguist-language=r
+*.Rmd linguist-language=r
 
 brfss_eda.html linguist-documentation=true
 gss_inference.html linguist-documentation=true
