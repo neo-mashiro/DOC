@@ -1,6 +1,5 @@
 # Makefile
 
-
 ## version 1
 ```makefile
 CC = gcc                             # the C-compiler, here we define one or more variables to store the compiler options
@@ -142,12 +141,10 @@ README.md: shell_script.sh
 ```
 
 
-# Travis CI
+# Travis-CI
 
-...
+# CircleCI
 
+# CMake
 
-# Reference
-
-https://www.gnu.org/software/make/manual/make.html  
-https://www.coursera.org/learn/writing-running-fixing-code/supplement/kTFif/fancier-make-options
+# premake5
