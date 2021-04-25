@@ -1,5 +1,5 @@
 # DOC
-Archive of documents, reports, previous works & exercises, for quick reference
+Some notebooks, documents, works, templates and old stuff, for quick lookup...
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/neo-mashiro/DOC?label=Doc%20Size&style=social)
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-blue.svg?style=plastic)](http://creativecommons.org/publicdomain/zero/1.0/)
@@ -12,7 +12,7 @@ https://api.github.com/repos/neo-mashiro/DOC
 
 ### Best practice of Github repo layout
 
-- standard `README.md` - https://github.com/RichardLitt/standard-readme 
+- standard `README.md` - https://github.com/RichardLitt/standard-readme
 - awesome `README.md` - https://github.com/matiassingers/awesome-readme
 - collection of `.gitignore` templates - https://github.com/github/gitignore
 - advanced usage of `.gitignore` - https://git-scm.com/docs/gitignore
@@ -21,8 +21,7 @@ https://api.github.com/repos/neo-mashiro/DOC
 - project site URL format - https://neo-mashiro.github.io/DOC/
 - project site publishing source - `/docs/index.html` or a separate branch `gh-pages`
 - list of popular badges to add - https://shields.io/
-- open-source license - https://choosealicense.com, https://gist.github.com/lukas-h/2a5d00690736b4c3a7ba 
+- open-source license - https://choosealicense.com, https://gist.github.com/lukas-h/2a5d00690736b4c3a7ba
 - continuous integration service - https://docs.travis-ci.com/
 - Github actions - https://docs.github.com/en/actions
 - repo structure tree - ```tree -hd > tree_view.out```
-
