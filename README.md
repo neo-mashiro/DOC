@@ -10,18 +10,30 @@ https://api.github.com/repos/neo-mashiro/DOC
 
 ---
 
-### Best practice of Github repo layout
+### PDF report templates
 
-- standard `README.md` - https://github.com/RichardLitt/standard-readme
-- awesome `README.md` - https://github.com/matiassingers/awesome-readme
-- collection of `.gitignore` templates - https://github.com/github/gitignore
-- advanced usage of `.gitignore` - https://git-scm.com/docs/gitignore
-- pull request template - https://github.com/atom/atom/blob/master/PULL_REQUEST_TEMPLATE.md
-- contributing template - https://github.com/atom/atom/blob/master/CONTRIBUTING.md
-- project site URL format - https://neo-mashiro.github.io/DOC/
-- project site publishing source - `/docs/index.html` or a separate branch `gh-pages`
-- list of popular badges to add - https://shields.io/
-- open-source license - https://choosealicense.com, https://gist.github.com/lukas-h/2a5d00690736b4c3a7ba
-- continuous integration service - https://docs.travis-ci.com/
-- Github actions - https://docs.github.com/en/actions
-- repo structure tree - ```tree -hd > tree_view.out```
+- [A cursory review of practical consensus protocols in distributed systems](https://github.com/neo-mashiro/DOC/blob/master/LaTeX/concensus.pdf)
+- [Exercises for Advanced Algorithms](https://github.com/neo-mashiro/DOC/blob/master/misc/advanced_algorithms.pdf)
+- [3D Math Practice for Computer Graphics](https://github.com/neo-mashiro/sketchpad/blob/main/doc/math_review.pdf)
+- [Mana-Oasis Game Design Document](https://github.com/neo-mashiro/Mana-Oasis/blob/master/Documents/design.pdf)
+
+### HTML report templates
+
+- [Sample elements mixed on a single webpage](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/web/index.html)
+- [Exploring the BRFSS data](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/R%20Markdown/brfss_eda.html)
+- [Statistical inference with the GSS data](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/R%20Markdown/gss_inference.html)
+- [Modeling and prediction for movies](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/R%20Markdown/multiple_linear_regression.html)
+- [Logistic Regression and Classification](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/R%20Markdown/logistic_mle_classification.html)
+- [Life on a piece of A4 paper](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/web/Life%20on%20A4.html)
+
+### MISC
+
+- [Version control with Git review](https://github.com/neo-mashiro/DOC/blob/master/command%20line/git.sh)
+- [Must-have console tools and commands](https://github.com/neo-mashiro/DOC/blob/master/command%20line/shell.sh)
+- [For local private MySQL database](https://github.com/neo-mashiro/DOC/blob/master/database/MySQL.sql)
+- [Data host on Cloud DB2](https://github.com/neo-mashiro/DOC/blob/master/database/cloud_db2.py)
+- [MongoDB notebooks](https://github.com/neo-mashiro/DOC/tree/master/database/MongoDB%20notebooks)
+- [NetworkX notebooks](https://github.com/neo-mashiro/DOC/tree/master/misc/NetworkX%20workshop)
+- [Algorithms and Data Structures Notebook 1](https://github.com/neo-mashiro/DOC/blob/master/misc/algorithms%20notebook%201.ipynb)
+- [Algorithms and Data Structures Notebook 2](https://github.com/neo-mashiro/DOC/blob/master/misc/algorithms%20notebook%202.ipynb)
+- [Simple algorithm exercises](https://github.com/neo-mashiro/DOC/tree/master/misc/algorithms%20exercises)
