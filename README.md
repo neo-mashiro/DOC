@@ -26,13 +26,16 @@ https://api.github.com/repos/neo-mashiro/DOC
 - [Logistic Regression and Classification](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/R%20Markdown/logistic_mle_classification.html)
 - [Life on a piece of A4 paper](https://nbviewer.jupyter.org/github/neo-mashiro/DOC/blob/master/web/Life%20on%20A4.html)
 
-### MISC
+### Command line & DB toolbox
 
 - [Version control with Git review](https://github.com/neo-mashiro/DOC/blob/master/command%20line/git.sh)
 - [Must-have console tools and commands](https://github.com/neo-mashiro/DOC/blob/master/command%20line/shell.sh)
 - [For local private MySQL database](https://github.com/neo-mashiro/DOC/blob/master/database/MySQL.sql)
 - [Data host on Cloud DB2](https://github.com/neo-mashiro/DOC/blob/master/database/cloud_db2.py)
 - [MongoDB notebooks](https://github.com/neo-mashiro/DOC/tree/master/database/MongoDB%20notebooks)
+
+### MISC
+
 - [NetworkX notebooks](https://github.com/neo-mashiro/DOC/tree/master/misc/NetworkX%20workshop)
 - [Algorithms and Data Structures Notebook 1](https://github.com/neo-mashiro/DOC/blob/master/misc/algorithms%20notebook%201.ipynb)
 - [Algorithms and Data Structures Notebook 2](https://github.com/neo-mashiro/DOC/blob/master/misc/algorithms%20notebook%202.ipynb)
