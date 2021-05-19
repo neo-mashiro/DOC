@@ -1,0 +1,632 @@
+---
+title: "Logistic Regression and Classification"
+output:
+  html_document:
+    fig_height: 4.5
+    fig_width: 6
+    fig_caption: true
+    highlight: pygments
+    theme: spacelab
+    toc: true
+    toc_depth: 3
+header-includes:
+  - \usepackage{amsmath}
+---
+
+* * *
+
+#### <span style="color: green">Wentao Lu (002276355), Yi Ren (002269013)</span>
+
+* * *
+
+## 1. Environment Setup
+
+Load required packages...
+
+```{r message = FALSE}
+library(ggplot2)
+library(latex2exp)
+library(dplyr)
+library(caret)
+library(GGally)
+```
+
+```{r echo = FALSE, message = FALSE}
+require(kableExtra)
+require(gridExtra)
+```
+
+Import dataset into the data frame...
+
+```{r import-data, cache=TRUE}
+df <- read.table("./SAheart.data", sep=",", head=T, row.names=1)
+```
+
+* * *
+
+## 2. Logistic function (Sigmoid)
+
+In logistic regression, the probability of $Y$ belonging to a certain class is related to the features $x_1,\dots,x_k$ via the logistic transformation:
+\begin{align*}
+  \ln \frac{p(y)}{1-p(y)} = \beta_0 + \beta_1 x_1 + \dots + \beta_k x_k
+\end{align*}
+
+By simple algebraic manipulation, it follows that:
+\begin{equation*}
+  p(y) = e^{\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k} (1-p(y))
+\end{equation*}
+
+Solving for $p(y)$, we obtain:
+\begin{align*}
+  p(y) &= \frac{e^{\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k}}{1+e^{\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k}}\\[0.5em]
+  \Rightarrow p(y) &= S(\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k)
+\end{align*}
+
+where $S(w)$ is the logistic sigmoid function given by
+\begin{align*}
+  S(w) = \frac{1}{1+e^{-w}} = \frac{e^w}{1+e^w}
+\end{align*}
+
+The sigmoid function takes any real value and squeezes it into the range $(0,1)$. As $w$ goes from $-\infty$ to $\infty$, $S(w)$ monotonically increases from 0 to 1. This is better explained by a graph, so let's sample some points to visualize its shape.
+
+```{r fig.align = 'center', fig.height = 4}
+x <- seq(-5, 5, 0.25)   # w
+y <- 1 / (1 + exp(-x))  # S(w)
+plot(x, y,
+    main = "logistic function (sigmoid)", font.main = 1,
+    xlab = 'w', ylab = 'S(w)', font.lab = 3,
+    cex.main = 1.1, cex.lab = 1, cex.axis = 0.8)
+```
+
+Now, if we connect all these data points, we end up with a smooth function curve
+
+```{r fig.align = 'center', fig.height = 3}
+sigmoid <- function(w) {
+    result <- 1 / (1 + exp(-w))
+    return(result)
+}
+
+ggplot(data.frame(w = c(-5, 5)), aes(x = w)) +
+    stat_function(fun = sigmoid, color = "red", lwd = 0.5) +
+    xlab("w") + ylab("S(w)") +
+    annotate(geom = "text", label = "sigmoid function", x = -2, y = 0.5, size = 4.5) +
+    theme(axis.title = element_text(size = 12, family = "Palatino Linotype"))
+```
+
+As we can see, no matter what value $\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k$ takes, the sigmoid function will convert that value to a probability in the $(0,1)$ range so that $p(y)$ is always between 0 and 1.
+
+* * *
+
+## 3. Maximum Likelihood Estimation (MLE)
+
+### 3.1 Cost / Objective function
+
+In logistic regression, the probability model is based on the binomial distribution. For binary classification, that is
+\begin{align*}
+  p(y_i = 1) &= p_i = \frac{e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}}{1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}} = S(w_i)\\
+  p(y_i = 0) &= 1 - p_i = 1 - S(w_i)
+\end{align*}
+
+where $\beta=(\beta_0,\dots,\beta_k)^T$, $x_i=(1,x_1^{(i)},\dots,x_k^{(i)})^T$ and $w_i=\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}$ for $1 \leq i \leq n$.
+
+Before moving on, it is helpful to notice that the sigmoid function has the **nice properties** that
+\begin{equation}
+  S(w) + S(-w) = \frac{e^w}{1+e^w} + \frac{1}{1+e^w} = 1 \Rightarrow S(-w) = 1 - S(w)\\
+  S'(w) = \frac{d(1+e^{-w})^{-1}}{dw} = \frac{1}{1+e^{-w}}\frac{e^{-w}}{1+e^{-w}} = S(w)(1 - S(w)) = S(w)S(-w)
+\end{equation}
+
+So, as a short hand, we can also write $p_i = S(w_i)$, $1 - p_i = 1 - S(w_i) = S(-w_i)$, this can help simplify our derivation below.
+
+Now, given a dataset with $n$ training examples and $k$ features, the conditional likelihood $L(\beta)$ can be written as
+\begin{align*}
+  L(\beta) &= \prod_{i=1}^{n} p(y_i | x_i, \beta)\\
+  &= \prod_{i=1}^{n} p_i^{y_i} (1-p_i)^{1-y_i}
+\end{align*}
+
+Based on our notations, the log-likelihood function is therefore
+\begin{align*}
+  \ell(\beta) &= \ln L(\beta) = \ln \prod_{i=1}^{n} p(y_i | x_i, \beta)\\
+  &= \sum_{i=1}^{n} \ln p(y_i | x_i, \beta) = \sum_{i=1}^{n} \ln [p_i^{y_i} (1-p_i)^{1-y_i}]\\
+  &= \sum_{i=1}^{n} [y_i \ln p_i + (1-y_i) \ln (1-p_i)]\\
+  &= \sum_{i=1}^{n} \{y_i [\ln p_i - \ln (1-p_i)] + \ln (1-p_i)\}\\
+  &= \sum_{i=1}^{n} y_i \ln \frac{p_i}{1-p_i} + \sum_{i=1}^{n} \ln (1-p_i)\\
+  &= \sum_{i=1}^{n} y_i \ln \frac{S(w_i)}{S(-w_i)} + \sum_{i=1}^{n} \ln S(-w_i)\\
+  &= \sum_{i=1}^{n} y_i \ln [\frac{e^{w_i}}{1+e^{w_i}}(1+e^{w_i})] + \sum_{i=1}^{n} \ln \frac{1}{1+e^{w_i}}\\
+  &= \sum_{i=1}^{n} y_i w_i - \sum_{i=1}^{n} \ln (1+e^{w_i})\\
+  &= \sum_{i=1}^{n} y_i (\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}) - \sum_{i=1}^{n} \ln (1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}})
+\end{align*}
+
+### 3.2 Compute the partial derivatives
+
+Given the objective function, we can derive its partial derivative with respect to $\beta_j$ for $0 \leq j \leq k$.
+\begin{align*}
+  \frac{\partial \ell}{\partial \beta_j} &= \sum_{i=1}^{n} y_ix_j^{(i)} - \sum_{i=1}^{n} \frac{e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}}{1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}}x_j^{(i)}\\
+  &= \sum_{i=1}^{n} (y_i-\frac{e^{w_i}}{1+e^{w_i}})x_j^{(i)}\\
+  &= \sum_{i=1}^{n} (y_i-p_i)x_j^{(i)}
+\end{align*}
+
+### 3.3 Maximize the log-likelihood
+
+For convex functions, the optimum occurs when the partial derivative is exactly zero. The likelihood function we're trying to optimize is convex upwards, so it's possible to find the global optimum by setting the derivative to zero. When $j=0$, since $x_0^{(i)}=1$ this becomes
+\begin{equation}
+  \frac{\partial \ell}{\partial \beta_0} = 0\\
+  \Rightarrow \sum_{i=1}^{n} (y_i-p_i)x_0^{(i)} = 0\\
+  \Rightarrow \sum_{i=1}^{n} (y_i-p_i) = 0\\
+  \Rightarrow \sum_{i=1}^{n} y_i = \sum_{i=1}^{n} p_i
+\end{equation}
+
+In other words, when likelihood is maximized, the sum of probabilities of each observation belonging to the positive class equals the total number of true positive cases. This makes sense because we are interpreting probabilities as degrees of belief in the model, and sure enough, our aggregate belief should match with the true positive cases.
+
+Also, dividing both sides by $n$ we have
+\begin{align*}
+  \frac{1}{n} \sum_{i=1}^{n} y_i = \frac{1}{n} \sum_{i=1}^{n} p_i \;\;\Rightarrow\;\; E(y_i) = E(p_i)
+\end{align*}
+
+From a statistical perspective, this means that the expected value of $y_i$ matches that of $p_i$, so the maximum likelihood estimate of $p_i$ is an __unbiased__ estimator of the true label $y_i$. To put it another way, in the optimum state, we would expect our MLE classifier to predict the same proportion of positive cases as in the real data, which is obviously understandable.
+
+### 3.4 Find closed-form solutions
+
+Recall that our maximum likelihood condition is to solve
+\begin{align*}
+  \frac{\partial \ell}{\partial \beta_j} = \sum_{i=1}^{n} (y_i-p_i)x_j^{(i)}
+  = \sum_{i=1}^{n} (y_i-\frac{e^{w_i}}{1+e^{w_i}})x_j^{(i)} = \sum_{i=1}^{n} (y_i - \frac{e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}}{1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}})x_j^{(i)} = 0
+\end{align*}
+
+The obtained equations are known to be transcendental in the sense that they cannot be expressed in terms of a finite sequence of polynomial algebraic operations, which is due to the inherent nonlinearity of the logistic sigmoid function. Unfortunately, there is no closed-form solution for our logistic model unless we are dealing with a super simple special case of it.
+
+For a model with $k$ features, there are $k + 1$ equations in total (including the constant term $\beta_0$), so we have to set each of them to zero and solve for each $\beta_k$. The underlying complexity here is that we have a system of $k + 1$ nonlinear equations each with $k + 1$ unknown variables, all of them are associated with each other in a nonlinear fashion. As a result, the solution vector $\beta$ cannot be derived algebraically as it can in the case of linear equations, we have to resort to an iterative process that approximately estimates it.
+
+That said, if we have additional assumptions that reduce the model to a trivial case, there might be an analytical presentation. For example, Stan Lipovetsky (2015) has showed in his paper [Analytical closed-form solution for binary logit regression by categorical predictors](https://doi.org/10.1080/02664763.2014.932760) that, in the case of only categorical predictors, a binary logistic model can be constructed in a closed-form solution with some clever math tricks.
+
+### 3.5 Numerical approximations
+
+Despite the fact that the equations do not have closed-form solutions, we can use the gradient ascent algorithm to maximize the likelihood and approximate the optimal parameters vector $\beta^*$ satisfying
+
+\begin{align*}
+  \beta^* &= \operatorname*{argmax}_\beta \ell(\beta)
+\end{align*}
+
+Depending on the model, using such an iterative process may not guarantee convergence, possibly due to the lack of training examples, multicollinearity between some pairs of features, or vast sparseness in the data. However, it is effective enough to explain our model, as our likelihood function is convex upwards with a unique global optimum.
+
+Gradient ascent is an iterative optimization algorithm for finding the local maximum of a differentiable objective function, it does so by repeatedly taking steps in the direction of steepest ascent, until we reach the apex of the hill. Instead of solving the equations analytically, we update the parameters vector $\beta$ in each run, and stop when the amount of change of each $\beta_k$ is less than $\epsilon$, which is a very small threshold value. Upon convergence, our final updated $\beta$ vector would be very close to the true optimum $\beta^*$.
+
+Unlike some complex optimization algorithms such as conjugate	gradient or L-BFGS, gradient ascent is much slower to converge and requires a learning rate to be manually picked, but many people still favor it as it's more intuitive, much easier to implement and debug.
+
+<br><span style="font-size:140%;color:black;">3.5.1 An overview of our dataset</span>
+
+Before coding up the algorithm, let's have a quick look at the provided dataset, which contains 462 observations of males in a heart-disease high-risk region of the Western Cape, South Africa. (_Source_: [The Elements of Statistical Learning, Second Edition, Stanford University](https://web.stanford.edu/~hastie/ElemStatLearn/datasets/SAheart.info.txt)).
+
+The data has 10 variables including subjects' consumption of tobacco and alcohols and so on, but for this project, we are only going to deal with two of them, both are numeric variables so there's no need to encode categorical inputs.
+
+Variable | Description
+-------- | -----------------------
+`ldl`    | The feature variable: the subject's low density lipoprotein cholesterol level
+`chd`    | The response variable: a binary indicator of whether the subject has coronary heart disease
+
+First, we filter out the variables of interest and remove missing values if there's any.
+
+```{r}
+df %>% select(ldl, chd) %>%
+    filter(!is.na(ldl) & !is.na(chd)) -> df
+glimpse(df)
+```
+
+The output above suggests that our data is super clean, it has no missing values in any observation.
+
+```{r}
+df %>% select(ldl, chd) %>% summary()
+```
+
+Next, we check the summary statistics of each variable. As we can see, the level of `ldl` ranges from 0.98 to 15.33 across the dataset, and 34.63% of the subjects are actually diagnosed with coronary heart disease. This is the <span style="color:red;">prevalence rate</span> of our data and we will use it later.
+
+Is there a clear relationship between `ldl` and `chd`? How are they correlated?
+
+```{r fig.align = 'center', fig.width = 10, fig.height = 3}
+ggplot(data = df, aes(x = ldl, y = chd)) +
+    geom_point(size = 0.2) +
+    theme(axis.title = element_text(size = 11, family = "Palatino Linotype")) -> p1
+
+ggplot(data = df, aes(x = ldl)) +
+    geom_histogram(binwidth = 0.05) +
+    theme(axis.title = element_text(size = 11, family = "Palatino Linotype")) -> p2
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+```{r}
+cor(df$ldl, df$chd, use = "complete.obs")
+```
+
+As shown above, it seems that the response variable `chd` is not very much related to the feature `ldl` alone, the correlation coefficient returned is only 0.263. The distribution of `ldl` is a little bit left-skewed, centered around 4.34, but across the entire range of `ldl`, we can find roughly equal occurrences of `chd` being 0 and 1.
+
+<br><span style="font-size:140%;color:black;">3.5.2 Implement gradient ascent algorithm</span>
+
+In the simple case where there is only one feature variable $x_1$, the gradient ascent algorithm can be implemented step-by-step as:
+
+<span style="color:#A834EB;">1. Normalize the features data to have zero mean and unit variance.</span>
+
+```{r message = FALSE}
+df %>% select(ldl, chd) %>%
+    mutate(ldl = (ldl - mean(ldl)) / sd(ldl)) -> df
+```
+
+```{r}
+# assert if the feature has indeed been normalized
+stopifnot(abs(mean(df$ldl) - 0) < 1e-4)  # will error out if mean not close to 0
+stopifnot(abs(sd(df$ldl) - 1) < 1e-4)    # will error out if standard deviation not close to 1
+```
+
+```{r message = FALSE, fig.align = 'center', fig.height = 3.75}
+# also check the probability density curve
+d <- density(df$ldl)
+plot(d, main = "Normalized Kernel Density", font.main = 1, cex.main = 0.9, cex.lab = 0.75, cex.axis = 0.8)
+grid(9, 6, lwd = 1)
+polygon(d, col = rgb(0.18, 0.8, 0.28, 0.45), border = "blue", lwd = 0.5)
+```
+
+<span style="color:#A834EB;">2. Split the data into training and testing sets for later consumption.</span>
+
+```{r message = FALSE}
+X <- df %>% select(ldl)  # features data frame
+y <- df %>% select(chd)  # response data frame (vector)
+
+# training set
+X_train <- head(X, 100)  # as required, use the first 100 rows for training
+y_train <- head(y, 100)
+
+# test set
+X_test <- tail(X, nrow(df) - 100)
+y_test <- tail(y, nrow(df) - 100)
+```
+
+<span style="color:#A834EB;">3. Write a function to compute the objective function (likelihood).</span>
+
+(Our implementation works for any dimensions of features)
+
+Recall that the log-likelihood function is
+\begin{align*}
+  \ell(\beta) &= \sum_{i=1}^{n} y_i w_i - \sum_{i=1}^{n} \ln (1+e^{w_i})\\
+  &= \sum_{i=1}^{n} y_i (\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}) - \sum_{i=1}^{n} \ln (1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}})
+\end{align*}
+
+```{r message = FALSE}
+eval_likelihood <- function(X, y, beta) {
+    # initialize the likelihood to zero
+    likelihood <- 0
+    
+    for (i in 1:nrow(X)) {
+        xi <- c(1, as.numeric(X[i,]))  # xi = c(x_0, x_1, ..., x_k)
+        yi <- as.numeric(y[i,])        # yi = 0 or 1 (truth)
+        wi <- sum(beta * xi)           # wi = beta_0 + beta_1 * x_1 + ... + beta_k * x_k
+
+        # sum over data points
+        likelihood <- likelihood + yi * wi - log(1 + exp(wi))
+    }
+    
+    return(likelihood)
+}
+```
+
+<span style="color:#A834EB;">4. Write a function to compute the partial derivatives.</span>
+
+(Our implementation works for any dimensions of features)
+
+Recall that the partial derivative with respect to $\beta_j$ is
+\begin{align*}
+  \frac{\partial \ell}{\partial \beta_j} &= \sum_{i=1}^{n} (y_i-p_i)x_j^{(i)}
+\end{align*}
+
+```{r message = FALSE}
+gradient <- function(X, y, beta) {
+    # pre-allocate the partial derivative vector
+    partials <- numeric(length(beta))
+
+    for (j in 1:length(beta)) {
+        for (i in 1:nrow(X)) {
+            xi <- c(1, as.numeric(X[i,]))  # xi = c(x_0, x_1, ..., x_k)
+            yi <- as.numeric(y[i,])        # yi = 0 or 1 (truth)
+            wi <- sum(beta * xi)           # wi = beta_0 + beta_1 * x_1 + ... + beta_k * x_k
+            pi <- sigmoid(wi)              # pi between 0 and 1 (probability)
+
+            # sum over data points
+            partials[j] <- partials[j] + (yi - pi) * xi[j]
+        }
+    }
+    
+    return(partials)
+}
+```
+
+<span style="color:#A834EB;">5. Complete the implementation of gradient ascent.</span>
+
+(Our implementation works for any dimensions of features)
+
+```{r message = FALSE}
+# ---------------------------------------------------
+# eta: the learning rate or step size to be tuned
+# epsilon: the tolerance term (convergence threshold)
+# ---------------------------------------------------
+gradient_ascent <- function(X, y, eta, epsilon = 1e-5) {
+    # initialize the beta vector to zeros
+    beta <- numeric(ncol(X) + 1)  # +1 to include the constant term `beta_0`
+    
+    # initialize counter and likelihoods cache
+    likelihoods <- numeric(0)
+    n_iter <- 1
+
+    repeat {
+        # compute the partial derivatives vector
+        partials <- gradient(X, y, beta)
+        
+        # update the beta parameters vector
+        beta <- beta + eta * partials
+        
+        # keep track of likelihood in each iteration
+        likelihoods[n_iter] <- eval_likelihood(X, y, beta)
+        n_iter <- n_iter + 1
+        
+        # check convergence criteria
+        if (all(partials < epsilon)) {
+            break
+        }
+    }
+    
+    return(list("beta" = beta, "likelihoods" = likelihoods))
+}
+```
+
+<br><span style="font-size:140%;color:black;">3.5.3 Train the model and observe convergence</span>
+
+Now everything's set up, let's train our model with the first 100 rows of data. To watch closely how the algorithm converges, we will try different values of learning rate $\eta$ that are exponentially spaced from 0.1 to 0.0001, and then visualize the likelihood in each run.
+
+```{r message = FALSE, cache = TRUE}
+r1 <- gradient_ascent(X_train, y_train, eta = 1e-1)  # learning rate = 0.1
+cat("(beta_0, beta_1) =", r1$beta)
+
+r2 <- gradient_ascent(X_train, y_train, eta = 1e-2)  # learning rate = 0.01
+cat("(beta_0, beta_1) =", r2$beta)
+
+r3 <- gradient_ascent(X_train, y_train, eta = 1e-3)  # learning rate = 0.001
+cat("(beta_0, beta_1) =", r3$beta)
+
+r4 <- gradient_ascent(X_train, y_train, eta = 1e-4)  # learning rate = 0.0001
+cat("(beta_0, beta_1) =", r4$beta)
+```
+
+```{r fig.align = 'center', fig.height = 4, fig.width = 10, message = FALSE, warning = FALSE}
+# extract the front 150 elements of the likelihoods vector from each run
+l1 <- r1$likelihoods[1:150]
+l2 <- r2$likelihoods[1:150]
+l3 <- r3$likelihoods[1:150]
+l4 <- r4$likelihoods[1:150]
+
+x <- seq(1, 150, 1)
+convergence <- data.frame(x, l1, l2, l3, l4)
+
+ggplot(convergence, aes(x, y = value)) + 
+    geom_point(aes(y = l1, col = "learning rate = 1e-1"), size = 2.2) +
+    geom_point(aes(y = l2, col = "learning rate = 1e-2"), size = 0.8) +
+    geom_point(aes(y = l3, col = "learning rate = 1e-3"), size = 0.6) +
+    geom_point(aes(y = l4, col = "learning rate = 1e-4"), size = 0.3) +
+    geom_line(aes(x = x, y = l1), size = 0.4) + 
+    ggtitle("Gradient ascent learning curve") +
+    xlab("number of iterations") + ylab("log likelihood") +
+    theme(plot.title = element_text(size = 14, family = "Palatino Linotype", hjust = 0.5)) +
+    theme(legend.position = c(0.9, 0.25), legend.title = element_blank()) +
+    theme(legend.text = element_text(size = 11, family = "Palatino Linotype")) +
+    theme(axis.title = element_text(size = 13, family = "Palatino Linotype")) + 
+    scale_color_manual(values = c("#eb4634", "#ff00ff", "#3377de", "#a420e6"))
+```
+
+From the above graph, we can see that picking the right step size requires a lot of trial and error, which can adversely affect our model performance if not wisely tuned. If the learning rate is too small (<span style="color:#a420e6;">0.0001</span>), the learning curve is smooth but moves too slowly, it can take forever to converge. If the stride is too large (<span style="color:#eb4634;">0.1</span>), the learning curve ended up oscillating back and forth, because we are overshooting along the curve, this can easily lead to divergence.
+
+Here, the learning rate of <span style="color:#3377de;">0.001</span> looks like a good choice, the curvature is smooth and gradually moving up over a moderate number of iterations. In practice, people often try a variable step size that decreases with iterations to speed up convergence, but that's an overkill for our small dataset.
+
+<br><span style="font-size:140%;color:black;">3.5.4 Predict labels for the test set</span>
+
+Now that we have obtained the optimal parameters $\beta^*$, let's predict the labels for the last 100 observations in the test set by computing their probabilities of coronary heart disease.
+
+\begin{align*}
+  p(y_i = 1) &= p_i = \frac{e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}}{1+e^{\beta_0+\beta_1x_1^{(i)}+\dots+\beta_kx_k^{(i)}}} = S(w_i)
+\end{align*}
+
+As a fair decision rule, we will classify a subject as being a patient of heart disease only if the probability is greater than 0.5, otherwise we assume he or she does not have heart disease. In other words, this is a simple threshold classifier.
+
+In the code block below, we have stored the 100 predictions into a single data frame, where the last 10 rows are printed out in a table.
+
+```{r message = FALSE}
+X_pred <- tail(X_test, 100)
+y_pred <- tail(y_test, 100)
+
+predictions <- data.frame(prob = numeric(0), pred = numeric(0), truth = numeric(0))
+
+for (i in 1:nrow(X_pred)) {
+    xi <- c(1, as.numeric(X_pred[i,]))
+    yi <- as.numeric(y_pred[i,])
+    wi <- sum(r4$beta * xi)
+    pi <- sigmoid(wi)
+    pred <- as.numeric(pi > 0.5)
+
+    predictions[i,] <- c(pi, pred, yi)
+}
+
+predictions[89:99,] %>%
+    kbl(align = "c", col.names = c('probability', 'prediction', 'truth')) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 12)
+```
+
+From this little table, we see that our simple threshold classifier only managed to predict about 70% observations correctly.
+
+<br><span style="font-size:140%;color:black;">3.5.5 Evaluate model predictions</span>
+
+```{r message = FALSE}
+accuracy <- sum(predictions$pred == predictions$truth) / nrow(predictions)
+cat("prediction accuracy =", accuracy)
+```
+
+It turns out that, the outcome of our predictions is pretty far from the ground truth. Out of 100 predictions, we only have 72% accuracy.
+
+Since we know that 34.63% (the prevalence rate) of the dataset are coronary heart disease cases, `chd = 0` is the majority class. Given such class imbalance, if we simply predict that every subject has no heart disease, this silly approach would already give us 65.37% accuracy. Therefore, a classifier must beat the 65.37% accuracy to be considered effective, otherwise it's pointless in the first place. Apparently enough, our 72% accuracy is not much better than random guess.
+
+```{r message = FALSE}
+pred <- cut(predictions$pred, 2, labels = c('N','Y'))
+truth <- cut(predictions$truth, 2, labels = c('N','Y'))
+confusionMatrix(pred, truth, prevalence = 0.3463, positive = 'Y', dnn = c(" predict "," truth "))
+```
+
+Looking at the statistics, we see that the real balanced accuracy is only 57.84%, much lower than what is expected to be effective. In fact, the true negative rate or specificity is 91.55% because negative cases are the class majority, nevertheless, the true positive rate or sensitivity is merely <span style="color:red;">24.14%</span>, so when we decide that a subject does have heart disease, we are correct only 24.14% of the time, this is way too low.
+
+Apart from that, the confusion matrix reveals 22 false negatives out of 100 in our prediction, in other words, 22% patients who have coronary heart disease would end up receiving no treatment, which could put their lives at great risks.
+
+* * *
+
+## 4. Improve the classifier with more features
+
+The reason we failed to obtain good results is that we only used 1 feature variable. That is, our model is essentially __biased__, even though we have observed convergence in gradient ascent with enough data, only the variance goes away, the model bias itself does not. As we've seen earlier, `chd` is not very much related to the feature `ldl` alone, the correlation coefficient is way too low, so failing to obtain nice prediction results certainly makes sense.
+
+In order to improve the classifier, it would be better to include more features, so let's load the complete dataset again.
+
+```{r reimport-data, cache=TRUE}
+df <- read.table("./SAheart.data", sep=",", head=T, row.names=1)
+```
+
+```{r fig.align = 'center', fig.width = 9, fig.height = 6}
+df %>%
+  select(sbp, ldl, adiposity, obesity, tobacco, alcohol, age) %>%
+  ggpairs(lower = list(continuous = wrap("points", color = "red", alpha = 0.3, size = 0.05)), 
+          diag = list(continuous = wrap("densityDiag", color = "blue")))
+```
+
+Unfortunately, if we include all features, a sample size of 400 is barely enough for a 10-dimensional feature space, this could easily lead our model to underfitting. Moreover, we find that some features may suffer from collinearity issues, for example, `obesity` and `adiposity` are very much correlated with each other. So, as an attempt, we try to include only these features below:
+
+```{r}
+df <- df %>%
+  select(ldl, alcohol, obesity, famhist, age, chd)
+```
+
+Variable    | Description
+----------- | -----------------------------------
+`ldl`       | low density lipoprotein cholesterol
+`famhist`   | family history of heart disease, absent or present
+`alcohol`   | current alcohol consumption
+`obesity`   | level of obesity
+`age`       | age at onset
+`chd`       | response, coronary heart disease
+
+<span style="color:black;">1. Check if there are any missing values in each feature: no, the dataset is complete.</span>
+
+```{r}
+cat(sapply(df, function(x) sum(is.na(x))))
+```
+
+<span style="color:black;">2. Check the type of each feature: all variables are numeric except for `famhist`, which is encoded as a factor.</span>
+
+```{r}
+cat(sapply(df, function(x) class(x)))
+```
+
+<span style="color:black;">3. One-hot-encode `famhist` into two numeric binary features `absent` and `present`.</span>
+
+```{r}
+df %>% 
+    mutate(absent = ifelse(famhist == 'Absent', 1, 0),
+           present = ifelse(famhist == 'Present', 1, 0),
+           famhist = NULL) -> df
+```
+
+<span style="color:black;">4. Normalize the features data to have zero mean and unit variance.</span>
+
+Since `absent`, `present` are one hot encoded binary labels, they are already standardized like the response variable `chd`, we should not normalize them. Normalization only applies to numeric variables not in the standard range.
+
+```{r message = FALSE}
+normalize <- function(feature) {
+    result <- (feature - mean(feature)) / sd(feature)
+    return(result)
+}
+
+df <- df %>% mutate_at(vars(-chd, -absent, -present), normalize)
+```
+
+```{r message = FALSE, results = 'hide'}
+# assert if the features have indeed been normalized
+check_normalize <- function(feature) {
+    stopifnot(abs(mean(feature) - 0) < 1e-4)
+    stopifnot(abs(sd(feature) - 1) < 1e-4)
+}
+
+df %>%
+    select(-c(chd, absent, present)) %>%  # exclude these columns from check
+    mutate_all(~ check_normalize(.))
+```
+
+<span style="color:black;">5. Split the data into training and testing sets for later consumption.</span>
+
+Now that our feature space is higher dimensional, we need to train the model with more data to observe convergence. Here, we are going to use the first 400 rows for training, the rest 62 rows for testing.
+
+```{r message = FALSE}
+X <- df %>% select(-c(chd))  # features data frame
+y <- df %>% select(chd)      # response data frame (vector)
+
+# training set
+X_train <- head(X, 400)
+y_train <- head(y, 400)
+
+# test set
+X_test <- tail(X, nrow(df) - 400)
+y_test <- tail(y, nrow(df) - 400)
+```
+
+<span style="color:black;">6. Train the model and observe convergence.</span>
+
+Estimated running time: ~ 100 seconds.
+
+```{r message = FALSE, cache = TRUE}
+system.time(result <- gradient_ascent(X_train, y_train, eta = 1e-3))
+```
+
+```{r message = FALSE, cache = TRUE, warning = FALSE, fig.align = 'center', fig.width = 10, fig.height = 4}
+x <- seq(1, length(result$likelihoods), 1)
+convergence <- data.frame(x, result$likelihoods)
+
+ggplot(convergence, aes(x, y = value)) +
+    geom_point(aes(y = result$likelihoods), colour = "#a420e6", size = 0.1) +
+    ggtitle("Gradient ascent learning curve") +
+    xlab("number of iterations") + ylab("log likelihood") +
+    theme(plot.title = element_text(size = 14, family = "Palatino Linotype", hjust = 0.5)) +
+    theme(axis.title = element_text(size = 13, family = "Palatino Linotype"))
+```
+
+<span style="color:black;">7. Predict labels on the remaining test set.</span>
+
+```{r message = FALSE}
+predictions <- data.frame(prob = numeric(0), pred = numeric(0), truth = numeric(0))
+
+for (i in 1:nrow(X_test)) {
+    xi <- c(1, as.numeric(X_test[i,]))
+    yi <- as.numeric(y_test[i,])
+    wi <- sum(result$beta * xi)
+    pi <- sigmoid(wi)
+    pred <- as.numeric(pi > 0.5)
+
+    predictions[i,] <- c(pi, pred, yi)
+}
+
+pred <- cut(predictions$pred, 2, labels = c('N','Y'))
+truth <- cut(predictions$truth, 2, labels = c('N','Y'))
+confusionMatrix(pred, truth, prevalence = 0.3463, positive = 'Y', dnn = c(" predict "," truth "))
+```
+
+This time, the real balanced accuracy has increased from 57.84% to 75.38% (raw accuracy is 79.03%). Most importantly, the true positive rate (sensitivity) has jumped from 24.14% to 66.67%, so we are more confident in predicting that one does have coronary heart disease. Although the result is still far from perfect, we have made a huge leap with very limited data.
+
+To further improve the goodness of fit of our model, we may need more useful features to reduce the model biases, which in turn requires a larger sample size for effective training.
+
+In conclusion, the logistic model takes into account the nonlinearity relationship between features and responses, and predicts a probability of a sample belonging to each category. Once correctly set up, it is a simple yet powerful tool for binary classification tasks.
+
+* * *
+
+## References
+
+- Trevor Hastie, Robert Tibshirani, and Jerome Friedman (2009) "The Elements of Statistical Learning", 2nd Edition, Springer New York <doi:10.1007/978-0-387-84858-7>
+-  Stan Lipovetsky (2015), Analytical closed-form solution for binary logit regression by categorical predictors, Journal of Applied Statistics, 42:1, 37-49 <doi:10.1080/02664763.2014.932760>
+- Scott A. Czepiel, Maximum likelihood estimation of logistic regression models: theory and implementation [http://czep.net/stat/mlelr.pdf](http://czep.net/stat/mlelr.pdf)
+- Pragya Sur and Emmanuel J. Candès (2019), A modern maximum-likelihood theory for high-dimensional logistic regression, PNAS July 16, 2019 116 (29) 14516-14525 [https://doi.org/10.1073/pnas.1810420116](https://doi.org/10.1073/pnas.1810420116)
