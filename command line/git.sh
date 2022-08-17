@@ -502,3 +502,13 @@ if the upstream repository is deleted, one of the existing public forks is chose
 ##  -------------------------------------------------------------------------------------------------
 
 https://github.com/rtyley/bfg-repo-cleaner
+
+
+##  -------------------------------------------------------------------------------------------------
+##  * Update in Git 2.23
+##  -------------------------------------------------------------------------------------------------
+To split and clarify the two different uses of git checkout, we now have 2 new commands.
+
+git switch <branchname>  # change branches, same as git checkout <branchname>
+git restore <file>       # reset files to certain revisions
+
