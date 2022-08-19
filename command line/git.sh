@@ -512,3 +512,52 @@ To split and clarify the two different uses of git checkout, we now have 2 new c
 git switch <branchname>  # change branches, same as git checkout <branchname>
 git restore <file>       # reset files to certain revisions
 
+
+##  -------------------------------------------------------------------------------------------------
+##  * Example - Working with a small team that shares a repository
+##  -------------------------------------------------------------------------------------------------
+The scenario is that a small group of people are working on a shared repository. Each member develops on his/her own feature branch, then make a pull request to merge onto master.
+Usually, the team wants to preserve the Git history for review purposes, the remote branches are never removed so there can be thousands of branches.
+In this case, it's better to use visualization tools like gitk to assist your workflow, and frequently rebase your feature branch onto master.
+The Git history will no longer be linear, but we should use squash merge as much as possible to clean up our pull request, and do local housekeeping.
+Each time before we do the push, or we know there's a new release on the remote/master, we must pull on a regular basis to make sure our local master is up to date.
+Keep in mind that we should never touch the master branch, development must be done on topic branches.
+The remote master is only updated by merging pull requests on Github, the local master is only updated by pulling from remote master.
+
+# make sure local master is up to date, check frequently
+git switch master
+git pull origin master
+gitk --all  # don't just look at the active branch
+
+# Case 1: if there's no new releases in the remote master branch, we can create a PR directly, but it's still good to check
+
+git switch feature
+git add file
+git commit -m "add feature"
+git push origin feature
+
+# Case 2: while we work on our topic branch, the remote master has been updated (most common), must rebase before submit PR
+
+git switch feature
+git add file
+git commit -m "add feature"
+git commit -m "clean up format"
+
+git switch master
+git pull origin master
+git switch feature
+git rebase -i master
+git push origin feature
+
+# Case 3: similar to the prior case, but after we create the PR (and before it's merged), the remote master has new updates. In this case, we need to rebase again while the PR is waiting for approval, which will cause the topic branch to diverge from its remote ref, so a normal push will be rejected. Watch the gitk graph carefully, and then do a force push. The change will also be reflected in the Github pull request page.
+
+git switch feature
+git add file
+git commit -m "add feature"
+git push origin feature
+
+git switch master
+git pull origin master
+git switch feature
+git rebase master
+git push -f origin feature  # since we have altered the history, we need to do a force push
