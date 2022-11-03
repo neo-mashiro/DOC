@@ -496,7 +496,7 @@ ntmy Jenny   # Nice to meet you Jenny
 #!/usr/bin/env bash
 # File: addseq.sh
 function addseq {
-  local sum=0    # must specify local keyword
+  local sum=0  # https://unix.stackexchange.com/a/202326/510878
 
   for element in $@
   do
