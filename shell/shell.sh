@@ -19,10 +19,11 @@ seasonal        # relative path does not start with a slash /.
                 # 201[78].txt matches 2017.txt or 2018.txt, but not 2016.txt
 {...}           # wildcard, match any of the command-separated patterns inside {}
                 # {*.txt, *.csv} matches any txt or csv files, but not pdf files.
-$@              # default variable, means all of the command-line parameters given by "bash script.sh <arg>" to the script
-$1              # default variable, means the 1st command-line parameter given by "bash script.sh <arg>" to the script
-$2              # default variable, means the 2nd command-line parameter given by "bash script.sh <arg>" to the script, and so on
-$#              # default variable, means the number of parameters given by "bash script.sh <arg>" to the script
+$@              # default variable, means all of the command-line arguments "<arg>" given by "bash ./script.sh <arg>"
+$0              # default variable, means the 0th command-line argument, i.e. the script path itself: "./script.sh"
+$1              # default variable, means the 1st command-line argument in <arg>
+$2              # default variable, means the 2nd command-line argument in <arg>, and so on
+$#              # default variable, means the total number of arguments given by "bash ./script.sh <arg>"
 #               # comment in shell scripts
 $?              # last exit status
 
